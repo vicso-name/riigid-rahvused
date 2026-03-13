@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Riigid & Rahvused — Эстонский тренажёр</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #131929;
+  --surface2: #1a2236;
+  --accent: #00e5a0;
+  --accent2: #00b8d4;
+  --danger: #ff5c6c;
+  --warning: #ffb74d;
+  --text: #e8ecf4;
+  --text-dim: #6b7a99;
+  --radius: 14px;
+  --glow: 0 0 30px rgba(0,229,160,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(0,229,160,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(0,184,212,0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 16px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  padding: 20px 0 12px;
+}
+
+.header h1 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header .subtitle {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── STATS BAR ── */
+.stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.stat-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.stat-card .label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+}
+
+.stat-card .value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.stat-card .value.correct { color: var(--accent); }
+.stat-card .value.wrong { color: var(--danger); }
+.stat-card .value.streak { color: var(--warning); }
+
+/* ── PROGRESS ── */
+.progress-wrap {
+  margin: 8px 0 16px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  margin-bottom: 6px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  width: 0%;
+}
+
+/* ── QUESTION CARD ── */
+.question-card {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--glow);
+}
+
+.q-number {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.q-mode {
+  display: inline-block;
+  font-size: 0.55rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(0,229,160,0.1);
+  color: var(--accent);
+  font-family: 'Space Mono', monospace;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.q-mode.typing {
+  background: rgba(0,184,212,0.1);
+  color: var(--accent2);
+}
+
+.q-text {
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.q-hint-text {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+/* ── OPTIONS (choice mode) ── */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.option-btn {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.option-btn:active {
+  transform: scale(0.97);
+}
+
+.option-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.option-btn.correct-answer {
+  border-color: var(--accent);
+  background: rgba(0,229,160,0.12);
+}
+
+.option-btn.wrong-answer {
+  border-color: var(--danger);
+  background: rgba(255,92,108,0.12);
+}
+
+.option-btn.dimmed {
+  opacity: 0.3;
+}
+
+.option-btn:disabled { cursor: default; }
+
+/* ── TYPING MODE ── */
+.typing-area {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.typing-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.typing-input:focus {
+  border-color: var(--accent2);
+}
+
+.typing-input.correct {
+  border-color: var(--accent);
+  background: rgba(0,229,160,0.08);
+}
+
+.typing-input.wrong {
+  border-color: var(--danger);
+  background: rgba(255,92,108,0.08);
+}
+
+.typing-submit {
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 12px;
+  color: var(--bg);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.2s;
+}
+
+.typing-submit:active { transform: scale(0.96); }
+.typing-submit:disabled { opacity: 0.4; cursor: default; }
+
+.correct-reveal {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-family: 'Space Mono', monospace;
+  padding: 8px 0;
+  text-align: center;
+}
+
+/* ── HINTS ── */
+.hints-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hint-btn {
+  flex: 1;
+  padding: 8px 4px;
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.hint-btn:active { transform: scale(0.95); }
+.hint-btn:disabled { opacity: 0.25; cursor: default; }
+.hint-btn .hint-icon { font-size: 1.1rem; display: block; margin-bottom: 2px; }
+.hint-btn .hint-count { color: var(--accent); }
+
+/* ── NEXT BUTTON ── */
+.next-btn {
+  margin-top: 16px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 12px;
+  color: var(--bg);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+  display: none;
+}
+
+.next-btn:active { transform: scale(0.96); }
+
+/* ── SCREENS ── */
+.screen { display: none; flex-direction: column; min-height: 100dvh; }
+.screen.active { display: flex; }
+
+/* ── START SCREEN ── */
+.start-screen {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 24px;
+  padding: 40px 20px;
+}
+
+.start-logo {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.start-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.start-desc {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+.start-btn {
+  padding: 16px 48px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 14px;
+  color: var(--bg);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+  margin-top: 12px;
+}
+
+.start-btn:active { transform: scale(0.95); }
+
+.start-info {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+/* ── RESULT SCREEN ── */
+.result-screen {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 20px;
+  padding: 40px 20px;
+}
+
+.result-emoji { font-size: 3.5rem; }
+
+.result-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.result-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.result-stat {
+  text-align: center;
+}
+
+.result-stat .big {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.result-stat .small {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+}
+
+.result-bar {
+  width: 100%;
+  max-width: 280px;
+  height: 8px;
+  background: var(--surface2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.result-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.restart-btn {
+  padding: 14px 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 14px;
+  color: var(--bg);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.restart-btn:active { transform: scale(0.95); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-in {
+  animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.shake {
+  animation: shake 0.4s ease;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  z-index: 100;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div class="container">
+<div id="startScreen" class="screen start-screen active">
+  <div class="start-logo">🇪🇪</div>
+  <h1 class="start-title">Riigid & Rahvused</h1>
+  <p class="start-desc">
+    Тренажёр по эстонским названиям стран, национальностей и падежам.<br>
+    Сначала — выбор из вариантов,<br>потом — ввод вручную.
+  </p>
+  <button class="start-btn" onclick="startGame()">Начать игру</button>
+  <p class="start-info">14 стран · 6 типов вопросов · ~30 раундов</p>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen" class="screen">
+  <div class="header">
+    <h1>Riigid & Rahvused</h1>
+    <div class="subtitle">Эстонский тренажёр</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="label">Верно</div>
+      <div class="value correct" id="correctCount">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Ошибки</div>
+      <div class="value wrong" id="wrongCount">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Серия</div>
+      <div class="value streak" id="streakCount">0</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progressText">Вопрос 1 / 30</span>
+      <span id="progressPercent">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="question-card" id="questionCard">
+    <div>
+      <span class="q-number" id="qNumber">Вопрос 1</span>
+      <span class="q-mode" id="qMode">Выбор</span>
+    </div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-hint-text" id="qHintText"></div>
+
+    <div class="hints-bar" id="hintsBar">
+      <button class="hint-btn" id="hint5050" onclick="useHint5050()">
+        <span class="hint-icon">✂️</span>
+        50/50 <span class="hint-count" id="hint5050count">(3)</span>
+      </button>
+      <button class="hint-btn" id="hintSkip" onclick="useHintSkip()">
+        <span class="hint-icon">⏭️</span>
+        Пропуск <span class="hint-count" id="hintSkipCount">(2)</span>
+      </button>
+      <button class="hint-btn" id="hintFirst" onclick="useHintFirst()">
+        <span class="hint-icon">💡</span>
+        Буква <span class="hint-count" id="hintFirstCount">(3)</span>
+      </button>
+    </div>
+
+    <div class="options" id="optionsWrap"></div>
+    <div class="typing-area" id="typingWrap" style="display:none">
+      <input type="text" class="typing-input" id="typingInput" placeholder="Введите ответ..." autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="typing-submit" id="typingSubmit" onclick="submitTyping()">Ответить</button>
+      <div class="correct-reveal" id="correctReveal"></div>
+    </div>
+
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Далее →</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScreen" class="screen result-screen">
+  <div class="result-emoji" id="resultEmoji">🎉</div>
+  <h2 class="result-title" id="resultTitle">Отлично!</h2>
+  <div class="result-stats">
+    <div class="result-stat">
+      <div class="big correct" id="resultCorrect">0</div>
+      <div class="small">верно</div>
+    </div>
+    <div class="result-stat">
+      <div class="big wrong" id="resultWrong">0</div>
+      <div class="small">ошибки</div>
+    </div>
+    <div class="result-stat">
+      <div class="big streak" id="resultBest">0</div>
+      <div class="small">лучшая серия</div>
+    </div>
+  </div>
+  <div class="result-bar"><div class="result-bar-fill" id="resultBarFill"></div></div>
+  <p id="resultPercent" style="color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.8rem;"></p>
+  <button class="restart-btn" onclick="startGame()">Играть снова</button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──
+const DATA = [
+  { riik:"Inglismaa", rahvus:"inglane", kus:"Inglismaal", rahvused:"inglased" },
+  { riik:"Saksamaa", rahvus:"sakslane", kus:"Saksamaal", rahvused:"sakslased" },
+  { riik:"Venemaa", rahvus:"venelane", kus:"Venemaal", rahvused:"venelased" },
+  { riik:"Prantsusmaa", rahvus:"prantslane", kus:"Prantsusmaal", rahvused:"prantslased" },
+  { riik:"Hispaania", rahvus:"hispaanlane", kus:"Hispaanias", rahvused:"hispaanlased" },
+  { riik:"Soome", rahvus:"soomlane", kus:"Soomes", rahvused:"soomlased" },
+  { riik:"Ukraina", rahvus:"ukrainlane", kus:"Ukrainas", rahvused:"ukrainlased" },
+  { riik:"Leedu", rahvus:"leedulane", kus:"Leedus", rahvused:"leedulased" },
+  { riik:"Itaalia", rahvus:"itaallane", kus:"Itaalias", rahvused:"itaallased" },
+  { riik:"Norra", rahvus:"norralane", kus:"Norras", rahvused:"norralased" },
+  { riik:"Rootsi", rahvus:"rootslane", kus:"Rootsis", rahvused:"rootslased" },
+  { riik:"Eesti", rahvus:"eestlane", kus:"Eestis", rahvused:"eestlased" },
+  { riik:"Läti", rahvus:"lätlane", kus:"Lätis", rahvused:"lätlased" },
+  { riik:"Soome", rahvus:"soomlane", kus:"Soomes", rahvused:"soomlased" }
+];
+
+// Remove duplicate Soome
+const COUNTRIES = DATA.filter((v,i,a) => a.findIndex(t => t.riik === v.riik) === i);
+
+const Q_TYPES = [
+  { id:"riik2rahvus", q: d => `Житель страны «${d.riik}»?`, a: d => d.rahvus, field:"rahvus" },
+  { id:"riik2kus", q: d => `Kus? — В стране «${d.riik}»?`, a: d => d.kus, field:"kus" },
+  { id:"riik2rahvused", q: d => `Жители «${d.riik}» (мн.ч.)?`, a: d => d.rahvused, field:"rahvused" },
+  { id:"rahvus2riik", q: d => `Откуда «${d.rahvus}»?`, a: d => d.riik, field:"riik" },
+  { id:"kus2riik", q: d => `«${d.kus}» — какая страна?`, a: d => d.riik, field:"riik" },
+  { id:"rahvused2riik", q: d => `«${d.rahvused}» — какая страна?`, a: d => d.riik, field:"riik" },
+];
+
+// ── STATE ──
+let questions = [];
+let current = 0;
+let correctTotal = 0;
+let wrongTotal = 0;
+let streak = 0;
+let bestStreak = 0;
+let hints5050 = 3;
+let hintsSkip = 2;
+let hintsFirst = 3;
+let answered = false;
+const TOTAL_Q = 30;
+const CHOICE_ROUNDS = 15; // first 15 = choice, rest = typing
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generateQuestions() {
+  const qs = [];
+  for (let i = 0; i < TOTAL_Q; i++) {
+    const country = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
+    const qtype = Q_TYPES[Math.floor(Math.random() * Q_TYPES.length)];
+    const correctAnswer = qtype.a(country);
+    // generate wrong options
+    const wrongs = shuffle(COUNTRIES.filter(c => qtype.a(c) !== correctAnswer))
+      .slice(0, 3)
+      .map(c => qtype.a(c));
+    // ensure unique
+    const uniqueWrongs = [...new Set(wrongs)];
+    while (uniqueWrongs.length < 3) {
+      const r = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
+      const v = qtype.a(r);
+      if (v !== correctAnswer && !uniqueWrongs.includes(v)) uniqueWrongs.push(v);
+    }
+    const options = shuffle([correctAnswer, ...uniqueWrongs.slice(0, 3)]);
+
+    qs.push({
+      text: qtype.q(country),
+      answer: correctAnswer,
+      options,
+      isTyping: i >= CHOICE_ROUNDS,
+      field: qtype.field,
+      country
+    });
+  }
+  return qs;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame() {
+  questions = generateQuestions();
+  current = 0;
+  correctTotal = 0;
+  wrongTotal = 0;
+  streak = 0;
+  bestStreak = 0;
+  hints5050 = 3;
+  hintsSkip = 2;
+  hintsFirst = 3;
+  showScreen('gameScreen');
+  renderQuestion();
+}
+
+function updateStats() {
+  document.getElementById('correctCount').textContent = correctTotal;
+  document.getElementById('wrongCount').textContent = wrongTotal;
+  document.getElementById('streakCount').textContent = streak;
+  const pct = Math.round((current / TOTAL_Q) * 100);
+  document.getElementById('progressText').textContent = `Вопрос ${current + 1} / ${TOTAL_Q}`;
+  document.getElementById('progressPercent').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+}
+
+function updateHintButtons() {
+  document.getElementById('hint5050count').textContent = `(${hints5050})`;
+  document.getElementById('hintSkipCount').textContent = `(${hintsSkip})`;
+  document.getElementById('hintFirstCount').textContent = `(${hintsFirst})`;
+  document.getElementById('hint5050').disabled = hints5050 <= 0 || answered;
+  document.getElementById('hintSkip').disabled = hintsSkip <= 0 || answered;
+  document.getElementById('hintFirst').disabled = hintsFirst <= 0 || answered;
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  const card = document.getElementById('questionCard');
+  card.classList.remove('animate-in');
+  void card.offsetWidth;
+  card.classList.add('animate-in');
+
+  document.getElementById('qNumber').textContent = `Вопрос ${current + 1}`;
+  const modeEl = document.getElementById('qMode');
+  modeEl.textContent = q.isTyping ? 'Ввод' : 'Выбор';
+  modeEl.className = q.isTyping ? 'q-mode typing' : 'q-mode';
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('qHintText').textContent = '';
+  document.getElementById('correctReveal').textContent = '';
+  document.getElementById('nextBtn').style.display = 'none';
+
+  const optWrap = document.getElementById('optionsWrap');
+  const typeWrap = document.getElementById('typingWrap');
+
+  // show/hide 50/50 only for choice mode
+  document.getElementById('hint5050').style.display = q.isTyping ? 'none' : '';
+  document.getElementById('hintFirst').style.display = q.isTyping ? '' : 'none';
+
+  if (q.isTyping) {
+    optWrap.style.display = 'none';
+    typeWrap.style.display = 'flex';
+    const inp = document.getElementById('typingInput');
+    inp.value = '';
+    inp.className = 'typing-input';
+    inp.disabled = false;
+    document.getElementById('typingSubmit').disabled = false;
+    setTimeout(() => inp.focus(), 100);
+  } else {
+    optWrap.style.display = 'flex';
+    typeWrap.style.display = 'none';
+    optWrap.innerHTML = '';
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt;
+      btn.onclick = () => selectOption(btn, opt);
+      btn.style.animationDelay = `${idx * 60}ms`;
+      optWrap.appendChild(btn);
+    });
+  }
+
+  updateStats();
+  updateHintButtons();
+}
+
+function selectOption(btn, selected) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const isCorrect = selected === q.answer;
+
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.answer) {
+      b.classList.add('correct-answer');
+    } else if (b === btn && !isCorrect) {
+      b.classList.add('wrong-answer');
+    } else {
+      b.classList.add('dimmed');
+    }
+  });
+
+  processAnswer(isCorrect);
+}
+
+function submitTyping() {
+  if (answered) return;
+  const inp = document.getElementById('typingInput');
+  const val = inp.value.trim().toLowerCase();
+  if (!val) return;
+
+  answered = true;
+  inp.disabled = true;
+  document.getElementById('typingSubmit').disabled = true;
+  const q = questions[current];
+  const isCorrect = val === q.answer.toLowerCase();
+
+  if (isCorrect) {
+    inp.classList.add('correct');
+  } else {
+    inp.classList.add('wrong');
+    inp.classList.add('shake');
+    document.getElementById('correctReveal').textContent = `Правильно: ${q.answer}`;
+  }
+
+  processAnswer(isCorrect);
+}
+
+function processAnswer(isCorrect) {
+  if (isCorrect) {
+    correctTotal++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+    showToast('Правильно! ✓', 'var(--accent)');
+  } else {
+    wrongTotal++;
+    streak = 0;
+    showToast('Неверно ✗', 'var(--danger)');
+  }
+  updateStats();
+  updateHintButtons();
+  document.getElementById('nextBtn').style.display = 'block';
+
+  if (current >= TOTAL_Q - 1) {
+    document.getElementById('nextBtn').textContent = 'Результаты →';
+  } else {
+    document.getElementById('nextBtn').textContent = 'Далее →';
+  }
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= TOTAL_Q) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ── HINTS ──
+function useHint5050() {
+  if (hints5050 <= 0 || answered) return;
+  hints5050--;
+  const q = questions[current];
+  const btns = [...document.querySelectorAll('.option-btn')];
+  const wrongBtns = btns.filter(b => b.textContent !== q.answer);
+  shuffle(wrongBtns).slice(0, 2).forEach(b => {
+    b.classList.add('dimmed');
+    b.disabled = true;
+  });
+  updateHintButtons();
+  showToast('Убраны 2 варианта', 'var(--warning)');
+}
+
+function useHintSkip() {
+  if (hintsSkip <= 0 || answered) return;
+  hintsSkip--;
+  answered = true;
+  const q = questions[current];
+
+  if (q.isTyping) {
+    document.getElementById('typingInput').disabled = true;
+    document.getElementById('typingSubmit').disabled = true;
+    document.getElementById('correctReveal').textContent = `Ответ: ${q.answer}`;
+  } else {
+    document.querySelectorAll('.option-btn').forEach(b => {
+      b.disabled = true;
+      if (b.textContent === q.answer) b.classList.add('correct-answer');
+      else b.classList.add('dimmed');
+    });
+  }
+
+  document.getElementById('nextBtn').style.display = 'block';
+  updateHintButtons();
+  showToast('Пропущено — без штрафа', 'var(--warning)');
+}
+
+function useHintFirst() {
+  if (hintsFirst <= 0 || answered) return;
+  hintsFirst--;
+  const q = questions[current];
+  const hint = q.answer.slice(0, Math.ceil(q.answer.length * 0.4)) + '...';
+  document.getElementById('qHintText').textContent = `Подсказка: ${hint}`;
+  updateHintButtons();
+  showToast('Показаны первые буквы', 'var(--warning)');
+}
+
+// ── RESULTS ──
+function showResults() {
+  showScreen('resultScreen');
+  const pct = Math.round((correctTotal / TOTAL_Q) * 100);
+  document.getElementById('resultCorrect').textContent = correctTotal;
+  document.getElementById('resultWrong').textContent = wrongTotal;
+  document.getElementById('resultBest').textContent = bestStreak;
+  document.getElementById('resultPercent').textContent = `${pct}% правильных ответов`;
+
+  let emoji = '🎉', title = 'Отлично!';
+  if (pct < 40) { emoji = '📚'; title = 'Нужна практика!'; }
+  else if (pct < 70) { emoji = '💪'; title = 'Хороший старт!'; }
+  else if (pct < 90) { emoji = '🔥'; title = 'Круто!'; }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+
+  setTimeout(() => {
+    document.getElementById('resultBarFill').style.width = `${pct}%`;
+  }, 200);
+}
+
+// ── TOAST ──
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1400);
+}
+
+// ── KEYBOARD SUPPORT ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const nextBtn = document.getElementById('nextBtn');
+    if (nextBtn.style.display === 'block') {
+      nextQuestion();
+    } else if (questions[current]?.isTyping && !answered) {
+      submitTyping();
+    }
+  }
+});
+</script>
+</body>
+</html>
