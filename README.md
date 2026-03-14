@@ -4,8 +4,6 @@
 
 **[▶ Играть](https://vicso-name.github.io/riigid-rahvused/)**
 
-![screenshot](screenshot.png)
-
 ## Что тренируем
 
 | Категория | Пример |

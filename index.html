@@ -244,6 +244,18 @@ body::before {
 
 .option-btn:disabled { cursor: default; }
 
+.option-btn .opt-est { display: block; }
+.option-btn .opt-ru {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.option-btn.correct-answer .opt-ru,
+.option-btn.wrong-answer .opt-ru { opacity: 0.7; }
+
 /* ── TYPING MODE ── */
 .typing-area {
   margin-top: auto;
@@ -524,7 +536,7 @@ body::before {
     Сначала — выбор из вариантов,<br>потом — ввод вручную.
   </p>
   <button class="start-btn" onclick="startGame()">Начать игру</button>
-  <p class="start-info">14 стран · 6 типов вопросов · ~30 раундов</p>
+  <p class="start-info">13 стран · 6 типов вопросов · ошибки возвращаются</p>
 </div>
 
 <!-- GAME SCREEN -->
@@ -620,34 +632,43 @@ body::before {
 <div class="toast" id="toast"></div>
 
 <script>
-// ── DATA ──
-const DATA = [
-  { riik:"Inglismaa", rahvus:"inglane", kus:"Inglismaal", rahvused:"inglased" },
-  { riik:"Saksamaa", rahvus:"sakslane", kus:"Saksamaal", rahvused:"sakslased" },
-  { riik:"Venemaa", rahvus:"venelane", kus:"Venemaal", rahvused:"venelased" },
-  { riik:"Prantsusmaa", rahvus:"prantslane", kus:"Prantsusmaal", rahvused:"prantslased" },
-  { riik:"Hispaania", rahvus:"hispaanlane", kus:"Hispaanias", rahvused:"hispaanlased" },
-  { riik:"Soome", rahvus:"soomlane", kus:"Soomes", rahvused:"soomlased" },
-  { riik:"Ukraina", rahvus:"ukrainlane", kus:"Ukrainas", rahvused:"ukrainlased" },
-  { riik:"Leedu", rahvus:"leedulane", kus:"Leedus", rahvused:"leedulased" },
-  { riik:"Itaalia", rahvus:"itaallane", kus:"Itaalias", rahvused:"itaallased" },
-  { riik:"Norra", rahvus:"norralane", kus:"Norras", rahvused:"norralased" },
-  { riik:"Rootsi", rahvus:"rootslane", kus:"Rootsis", rahvused:"rootslased" },
-  { riik:"Eesti", rahvus:"eestlane", kus:"Eestis", rahvused:"eestlased" },
-  { riik:"Läti", rahvus:"lätlane", kus:"Lätis", rahvused:"lätlased" },
-  { riik:"Soome", rahvus:"soomlane", kus:"Soomes", rahvused:"soomlased" }
+// ── DATA (with Russian translations) ──
+const COUNTRIES = [
+  { riik:"Inglismaa", rahvus:"inglane", kus:"Inglismaal", rahvused:"inglased", ru:"Англия", ruNat:"англичанин", ruNats:"англичане" },
+  { riik:"Saksamaa", rahvus:"sakslane", kus:"Saksamaal", rahvused:"sakslased", ru:"Германия", ruNat:"немец", ruNats:"немцы" },
+  { riik:"Venemaa", rahvus:"venelane", kus:"Venemaal", rahvused:"venelased", ru:"Россия", ruNat:"русский", ruNats:"русские" },
+  { riik:"Prantsusmaa", rahvus:"prantslane", kus:"Prantsusmaal", rahvused:"prantslased", ru:"Франция", ruNat:"француз", ruNats:"французы" },
+  { riik:"Hispaania", rahvus:"hispaanlane", kus:"Hispaanias", rahvused:"hispaanlased", ru:"Испания", ruNat:"испанец", ruNats:"испанцы" },
+  { riik:"Soome", rahvus:"soomlane", kus:"Soomes", rahvused:"soomlased", ru:"Финляндия", ruNat:"финн", ruNats:"финны" },
+  { riik:"Ukraina", rahvus:"ukrainlane", kus:"Ukrainas", rahvused:"ukrainlased", ru:"Украина", ruNat:"украинец", ruNats:"украинцы" },
+  { riik:"Leedu", rahvus:"leedulane", kus:"Leedus", rahvused:"leedulased", ru:"Литва", ruNat:"литовец", ruNats:"литовцы" },
+  { riik:"Itaalia", rahvus:"itaallane", kus:"Itaalias", rahvused:"itaallased", ru:"Италия", ruNat:"итальянец", ruNats:"итальянцы" },
+  { riik:"Norra", rahvus:"norralane", kus:"Norras", rahvused:"norralased", ru:"Норвегия", ruNat:"норвежец", ruNats:"норвежцы" },
+  { riik:"Rootsi", rahvus:"rootslane", kus:"Rootsis", rahvused:"rootslased", ru:"Швеция", ruNat:"швед", ruNats:"шведы" },
+  { riik:"Eesti", rahvus:"eestlane", kus:"Eestis", rahvused:"eestlased", ru:"Эстония", ruNat:"эстонец", ruNats:"эстонцы" },
+  { riik:"Läti", rahvus:"lätlane", kus:"Lätis", rahvused:"lätlased", ru:"Латвия", ruNat:"латыш", ruNats:"латыши" },
 ];
 
-// Remove duplicate Soome
-const COUNTRIES = DATA.filter((v,i,a) => a.findIndex(t => t.riik === v.riik) === i);
+// Russian label for each Estonian value (for option subtitles)
+function getRussianFor(estValue, field) {
+  const c = COUNTRIES.find(c => c[field] === estValue);
+  if (!c) return '';
+  switch(field) {
+    case 'riik': return c.ru;
+    case 'rahvus': return c.ruNat;
+    case 'kus': return 'в ' + c.ru;  // simplified
+    case 'rahvused': return c.ruNats;
+    default: return '';
+  }
+}
 
 const Q_TYPES = [
-  { id:"riik2rahvus", q: d => `Житель страны «${d.riik}»?`, a: d => d.rahvus, field:"rahvus" },
-  { id:"riik2kus", q: d => `Kus? — В стране «${d.riik}»?`, a: d => d.kus, field:"kus" },
-  { id:"riik2rahvused", q: d => `Жители «${d.riik}» (мн.ч.)?`, a: d => d.rahvused, field:"rahvused" },
-  { id:"rahvus2riik", q: d => `Откуда «${d.rahvus}»?`, a: d => d.riik, field:"riik" },
-  { id:"kus2riik", q: d => `«${d.kus}» — какая страна?`, a: d => d.riik, field:"riik" },
-  { id:"rahvused2riik", q: d => `«${d.rahvused}» — какая страна?`, a: d => d.riik, field:"riik" },
+  { id:"riik2rahvus", q: d => `Житель страны «${d.riik}»?`, a: d => d.rahvus, field:"rahvus", hint: d => d.ru },
+  { id:"riik2kus", q: d => `Kus? — В стране «${d.riik}»?`, a: d => d.kus, field:"kus", hint: d => d.ru },
+  { id:"riik2rahvused", q: d => `Жители «${d.riik}» (мн.ч.)?`, a: d => d.rahvused, field:"rahvused", hint: d => d.ru },
+  { id:"rahvus2riik", q: d => `Откуда «${d.rahvus}»?`, a: d => d.riik, field:"riik", hint: d => d.ruNat },
+  { id:"kus2riik", q: d => `«${d.kus}» — какая страна?`, a: d => d.riik, field:"riik", hint: d => 'в ' + d.ru },
+  { id:"rahvused2riik", q: d => `«${d.rahvused}» — какая страна?`, a: d => d.riik, field:"riik", hint: d => d.ruNats },
 ];
 
 // ── STATE ──
@@ -661,8 +682,10 @@ let hints5050 = 3;
 let hintsSkip = 2;
 let hintsFirst = 3;
 let answered = false;
-const TOTAL_Q = 30;
-const CHOICE_ROUNDS = 15; // first 15 = choice, rest = typing
+let totalAnswered = 0;
+const BASE_Q = 24;       // base questions
+const CHOICE_ROUNDS = 12; // first 12 = choice, rest = typing
+let retryQueue = [];      // spaced repetition: wrong answers re-appear
 
 function shuffle(arr) {
   const a = [...arr];
@@ -673,35 +696,45 @@ function shuffle(arr) {
   return a;
 }
 
+function makeQuestion(country, qtype, isTyping) {
+  const correctAnswer = qtype.a(country);
+  const wrongCountries = shuffle(COUNTRIES.filter(c => qtype.a(c) !== correctAnswer));
+  const wrongs = [];
+  const seen = new Set([correctAnswer]);
+  for (const c of wrongCountries) {
+    const v = qtype.a(c);
+    if (!seen.has(v)) { wrongs.push(v); seen.add(v); }
+    if (wrongs.length >= 3) break;
+  }
+  const options = shuffle([correctAnswer, ...wrongs]);
+  return {
+    text: qtype.q(country),
+    answer: correctAnswer,
+    options,
+    isTyping,
+    field: qtype.field,
+    country,
+    qtype,
+    isRetry: false
+  };
+}
+
 function generateQuestions() {
   const qs = [];
-  for (let i = 0; i < TOTAL_Q; i++) {
-    const country = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
+  // Ensure every country appears at least once in first batch
+  const shuffledCountries = shuffle([...COUNTRIES]);
+  for (let i = 0; i < BASE_Q; i++) {
+    const country = i < COUNTRIES.length
+      ? shuffledCountries[i]
+      : COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
     const qtype = Q_TYPES[Math.floor(Math.random() * Q_TYPES.length)];
-    const correctAnswer = qtype.a(country);
-    // generate wrong options
-    const wrongs = shuffle(COUNTRIES.filter(c => qtype.a(c) !== correctAnswer))
-      .slice(0, 3)
-      .map(c => qtype.a(c));
-    // ensure unique
-    const uniqueWrongs = [...new Set(wrongs)];
-    while (uniqueWrongs.length < 3) {
-      const r = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
-      const v = qtype.a(r);
-      if (v !== correctAnswer && !uniqueWrongs.includes(v)) uniqueWrongs.push(v);
-    }
-    const options = shuffle([correctAnswer, ...uniqueWrongs.slice(0, 3)]);
-
-    qs.push({
-      text: qtype.q(country),
-      answer: correctAnswer,
-      options,
-      isTyping: i >= CHOICE_ROUNDS,
-      field: qtype.field,
-      country
-    });
+    qs.push(makeQuestion(country, qtype, i >= CHOICE_ROUNDS));
   }
   return qs;
+}
+
+function getTotalQ() {
+  return questions.length;
 }
 
 function showScreen(id) {
@@ -711,11 +744,13 @@ function showScreen(id) {
 
 function startGame() {
   questions = generateQuestions();
+  retryQueue = [];
   current = 0;
   correctTotal = 0;
   wrongTotal = 0;
   streak = 0;
   bestStreak = 0;
+  totalAnswered = 0;
   hints5050 = 3;
   hintsSkip = 2;
   hintsFirst = 3;
@@ -727,8 +762,9 @@ function updateStats() {
   document.getElementById('correctCount').textContent = correctTotal;
   document.getElementById('wrongCount').textContent = wrongTotal;
   document.getElementById('streakCount').textContent = streak;
-  const pct = Math.round((current / TOTAL_Q) * 100);
-  document.getElementById('progressText').textContent = `Вопрос ${current + 1} / ${TOTAL_Q}`;
+  const total = getTotalQ();
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('progressText').textContent = `Вопрос ${current + 1} / ${total}`;
   document.getElementById('progressPercent').textContent = `${pct}%`;
   document.getElementById('progressFill').style.width = `${pct}%`;
 }
@@ -750,10 +786,17 @@ function renderQuestion() {
   void card.offsetWidth;
   card.classList.add('animate-in');
 
-  document.getElementById('qNumber').textContent = `Вопрос ${current + 1}`;
+  document.getElementById('qNumber').textContent = q.isRetry
+    ? `Повтор ошибки`
+    : `Вопрос ${current + 1}`;
   const modeEl = document.getElementById('qMode');
-  modeEl.textContent = q.isTyping ? 'Ввод' : 'Выбор';
-  modeEl.className = q.isTyping ? 'q-mode typing' : 'q-mode';
+  if (q.isRetry) {
+    modeEl.textContent = '🔁 Закрепление';
+    modeEl.className = 'q-mode typing';
+  } else {
+    modeEl.textContent = q.isTyping ? 'Ввод' : 'Выбор';
+    modeEl.className = q.isTyping ? 'q-mode typing' : 'q-mode';
+  }
   document.getElementById('qText').textContent = q.text;
   document.getElementById('qHintText').textContent = '';
   document.getElementById('correctReveal').textContent = '';
@@ -762,7 +805,6 @@ function renderQuestion() {
   const optWrap = document.getElementById('optionsWrap');
   const typeWrap = document.getElementById('typingWrap');
 
-  // show/hide 50/50 only for choice mode
   document.getElementById('hint5050').style.display = q.isTyping ? 'none' : '';
   document.getElementById('hintFirst').style.display = q.isTyping ? '' : 'none';
 
@@ -782,7 +824,9 @@ function renderQuestion() {
     q.options.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'option-btn';
-      btn.textContent = opt;
+      btn.dataset.value = opt;
+      const ruLabel = getRussianFor(opt, q.field);
+      btn.innerHTML = `<span class="opt-est">${opt}</span>${ruLabel ? `<span class="opt-ru">${ruLabel}</span>` : ''}`;
       btn.onclick = () => selectOption(btn, opt);
       btn.style.animationDelay = `${idx * 60}ms`;
       optWrap.appendChild(btn);
@@ -801,7 +845,7 @@ function selectOption(btn, selected) {
 
   document.querySelectorAll('.option-btn').forEach(b => {
     b.disabled = true;
-    if (b.textContent === q.answer) {
+    if (b.dataset.value === q.answer) {
       b.classList.add('correct-answer');
     } else if (b === btn && !isCorrect) {
       b.classList.add('wrong-answer');
@@ -823,6 +867,7 @@ function submitTyping() {
   inp.disabled = true;
   document.getElementById('typingSubmit').disabled = true;
   const q = questions[current];
+  // Accept with or without special chars, normalize ä/ö/ü
   const isCorrect = val === q.answer.toLowerCase();
 
   if (isCorrect) {
@@ -837,6 +882,9 @@ function submitTyping() {
 }
 
 function processAnswer(isCorrect) {
+  const q = questions[current];
+  totalAnswered++;
+
   if (isCorrect) {
     correctTotal++;
     streak++;
@@ -846,12 +894,21 @@ function processAnswer(isCorrect) {
     wrongTotal++;
     streak = 0;
     showToast('Неверно ✗', 'var(--danger)');
+
+    // ── SPACED REPETITION: re-insert this question 4-6 positions later ──
+    if (!q.isRetry) {
+      const retryQ = makeQuestion(q.country, q.qtype, q.isTyping);
+      retryQ.isRetry = true;
+      const insertAt = Math.min(current + 4 + Math.floor(Math.random() * 3), questions.length);
+      questions.splice(insertAt, 0, retryQ);
+    }
   }
+
   updateStats();
   updateHintButtons();
   document.getElementById('nextBtn').style.display = 'block';
 
-  if (current >= TOTAL_Q - 1) {
+  if (current >= getTotalQ() - 1) {
     document.getElementById('nextBtn').textContent = 'Результаты →';
   } else {
     document.getElementById('nextBtn').textContent = 'Далее →';
@@ -860,7 +917,7 @@ function processAnswer(isCorrect) {
 
 function nextQuestion() {
   current++;
-  if (current >= TOTAL_Q) {
+  if (current >= getTotalQ()) {
     showResults();
   } else {
     renderQuestion();
@@ -873,7 +930,7 @@ function useHint5050() {
   hints5050--;
   const q = questions[current];
   const btns = [...document.querySelectorAll('.option-btn')];
-  const wrongBtns = btns.filter(b => b.textContent !== q.answer);
+  const wrongBtns = btns.filter(b => b.dataset.value !== q.answer);
   shuffle(wrongBtns).slice(0, 2).forEach(b => {
     b.classList.add('dimmed');
     b.disabled = true;
@@ -895,7 +952,7 @@ function useHintSkip() {
   } else {
     document.querySelectorAll('.option-btn').forEach(b => {
       b.disabled = true;
-      if (b.textContent === q.answer) b.classList.add('correct-answer');
+      if (b.dataset.value === q.answer) b.classList.add('correct-answer');
       else b.classList.add('dimmed');
     });
   }
@@ -918,7 +975,7 @@ function useHintFirst() {
 // ── RESULTS ──
 function showResults() {
   showScreen('resultScreen');
-  const pct = Math.round((correctTotal / TOTAL_Q) * 100);
+  const pct = Math.round((correctTotal / totalAnswered) * 100);
   document.getElementById('resultCorrect').textContent = correctTotal;
   document.getElementById('resultWrong').textContent = wrongTotal;
   document.getElementById('resultBest').textContent = bestStreak;
