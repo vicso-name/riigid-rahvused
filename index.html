@@ -26,6 +26,12 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .stat-card .value.correct{color:var(--accent);}.stat-card .value.wrong{color:var(--danger);}.stat-card .value.streak{color:var(--warning);}
 .pause-card{cursor:pointer;transition:all 0.2s;}.pause-card:active{transform:scale(0.95);}
 
+.audio-row{display:flex;gap:10px;align-items:center;margin-top:12px;display:none;}
+.audio-btn{flex:0 0 auto;width:48px;height:48px;border-radius:50%;background:rgba(0,184,212,0.12);border:1.5px solid rgba(0,184,212,0.3);color:var(--accent2);font-size:1.3rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
+.audio-btn:active{transform:scale(0.9);}
+.audio-btn.playing{background:rgba(0,184,212,0.25);}
+.audio-answer{font-size:0.95rem;font-weight:600;color:var(--accent);font-family:'Space Mono',monospace;}
+
 .progress-wrap{margin:8px 0 16px;}
 .progress-label{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:6px;}
 .progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
@@ -162,6 +168,10 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
       <input type="text" class="typing-input" id="typingInput" placeholder="Введите ответ..." autocomplete="off" autocapitalize="off" spellcheck="false">
       <button class="typing-submit" id="typingSubmit" onclick="submitTyping()">Ответить</button>
       <div class="correct-reveal" id="correctReveal"></div>
+    </div>
+    <div class="audio-row" id="audioRow">
+      <button class="audio-btn" id="audioBtn" onclick="playAnswer()">🔊</button>
+      <span class="audio-answer" id="audioAnswer"></span>
     </div>
     <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Далее →</button>
   </div>
@@ -372,6 +382,7 @@ function render(){
   document.getElementById('qHintText').textContent='';
   document.getElementById('correctReveal').textContent='';
   document.getElementById('nextBtn').style.display='none';
+  hideAudioRow();
 
   if(q.type==='sentence'){
     const ru=document.createElement('div');ru.className='q-ru-prompt';ru.textContent='🇷🇺 '+q.ruPrompt;
@@ -425,6 +436,41 @@ function submitTyping(){
   proc(ok);
 }
 
+// ── AUDIO ──
+function getAudioFile(word) {
+  // Map special chars: ä -> a in filename
+  const fname = word.toLowerCase().replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u');
+  return 'audio/' + fname + '.wav';
+}
+
+let currentAudio = null;
+
+function playAnswer() {
+  if (!curQ) return;
+  const file = getAudioFile(curQ.answer);
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  currentAudio = new Audio(file);
+  const btn = document.getElementById('audioBtn');
+  btn.classList.add('playing');
+  currentAudio.onended = () => { btn.classList.remove('playing'); };
+  currentAudio.onerror = () => { btn.classList.remove('playing'); };
+  currentAudio.play().catch(() => btn.classList.remove('playing'));
+}
+
+function showAudioRow(answer) {
+  const row = document.getElementById('audioRow');
+  const label = document.getElementById('audioAnswer');
+  label.textContent = answer;
+  row.style.display = 'flex';
+  // Auto-play the answer
+  setTimeout(() => playAnswer(), 300);
+}
+
+function hideAudioRow() {
+  document.getElementById('audioRow').style.display = 'none';
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+}
+
 function proc(ok){
   const q=curQ,r=q.country.riik,s=cState[r];total++;
   if(ok){
@@ -439,7 +485,8 @@ function proc(ok){
     if(s.level>0){s.level--;showToast(`${q.country.ru} ← уровень ${s.level+1}`,'var(--danger)');}
   }
   updDot(r);updStats();
-  saveProgress(); // auto-save after each answer
+  saveProgress();
+  showAudioRow(q.answer);
   document.getElementById('nextBtn').style.display='block';
   document.getElementById('nextBtn').textContent=isDone()?'Результаты →':'Далее →';
 }
