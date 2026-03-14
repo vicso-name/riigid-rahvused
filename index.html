@@ -256,6 +256,46 @@ body::before {
 .option-btn.correct-answer .opt-ru,
 .option-btn.wrong-answer .opt-ru { opacity: 0.7; }
 
+/* ── SENTENCE QUESTION ── */
+.q-sentence {
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.7;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.q-sentence .gap {
+  display: inline-block;
+  min-width: 80px;
+  border-bottom: 2px dashed var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+  text-align: center;
+  padding: 0 4px;
+  margin: 0 2px;
+}
+
+.q-sentence .gap.filled {
+  border-bottom-style: solid;
+}
+
+.q-ru-prompt {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  border-left: 3px solid var(--accent2);
+  line-height: 1.5;
+}
+
+.q-mode.sentence {
+  background: rgba(255,183,77,0.12);
+  color: var(--warning);
+}
+
 /* ── TYPING MODE ── */
 .typing-area {
   margin-top: auto;
@@ -532,11 +572,12 @@ body::before {
   <div class="start-logo">🇪🇪</div>
   <h1 class="start-title">Riigid & Rahvused</h1>
   <p class="start-desc">
-    Тренажёр по эстонским названиям стран, национальностей и падежам.<br>
-    Сначала — выбор из вариантов,<br>потом — ввод вручную.
+    Тренажёр эстонских стран, национальностей и падежей.<br>
+    Три фазы: выбор → ввод → предложения.<br>
+    Всегда с русского на эстонский.
   </p>
   <button class="start-btn" onclick="startGame()">Начать игру</button>
-  <p class="start-info">13 стран · 6 типов вопросов · ошибки возвращаются</p>
+  <p class="start-info">13 стран · 9 шаблонов предложений · ошибки возвращаются</p>
 </div>
 
 <!-- GAME SCREEN -->
@@ -634,19 +675,19 @@ body::before {
 <script>
 // ── DATA (with Russian translations) ──
 const COUNTRIES = [
-  { riik:"Inglismaa", rahvus:"inglane", kus:"Inglismaal", rahvused:"inglased", ru:"Англия", ruNat:"англичанин", ruNats:"англичане" },
-  { riik:"Saksamaa", rahvus:"sakslane", kus:"Saksamaal", rahvused:"sakslased", ru:"Германия", ruNat:"немец", ruNats:"немцы" },
-  { riik:"Venemaa", rahvus:"venelane", kus:"Venemaal", rahvused:"venelased", ru:"Россия", ruNat:"русский", ruNats:"русские" },
-  { riik:"Prantsusmaa", rahvus:"prantslane", kus:"Prantsusmaal", rahvused:"prantslased", ru:"Франция", ruNat:"француз", ruNats:"французы" },
-  { riik:"Hispaania", rahvus:"hispaanlane", kus:"Hispaanias", rahvused:"hispaanlased", ru:"Испания", ruNat:"испанец", ruNats:"испанцы" },
-  { riik:"Soome", rahvus:"soomlane", kus:"Soomes", rahvused:"soomlased", ru:"Финляндия", ruNat:"финн", ruNats:"финны" },
-  { riik:"Ukraina", rahvus:"ukrainlane", kus:"Ukrainas", rahvused:"ukrainlased", ru:"Украина", ruNat:"украинец", ruNats:"украинцы" },
-  { riik:"Leedu", rahvus:"leedulane", kus:"Leedus", rahvused:"leedulased", ru:"Литва", ruNat:"литовец", ruNats:"литовцы" },
-  { riik:"Itaalia", rahvus:"itaallane", kus:"Itaalias", rahvused:"itaallased", ru:"Италия", ruNat:"итальянец", ruNats:"итальянцы" },
-  { riik:"Norra", rahvus:"norralane", kus:"Norras", rahvused:"norralased", ru:"Норвегия", ruNat:"норвежец", ruNats:"норвежцы" },
-  { riik:"Rootsi", rahvus:"rootslane", kus:"Rootsis", rahvused:"rootslased", ru:"Швеция", ruNat:"швед", ruNats:"шведы" },
-  { riik:"Eesti", rahvus:"eestlane", kus:"Eestis", rahvused:"eestlased", ru:"Эстония", ruNat:"эстонец", ruNats:"эстонцы" },
-  { riik:"Läti", rahvus:"lätlane", kus:"Lätis", rahvused:"lätlased", ru:"Латвия", ruNat:"латыш", ruNats:"латыши" },
+  { riik:"Inglismaa", rahvus:"inglane", kus:"Inglismaal", rahvused:"inglased", ru:"Англия", ruNat:"англичанин", ruNats:"англичане", ruKus:"в Англии" },
+  { riik:"Saksamaa", rahvus:"sakslane", kus:"Saksamaal", rahvused:"sakslased", ru:"Германия", ruNat:"немец", ruNats:"немцы", ruKus:"в Германии" },
+  { riik:"Venemaa", rahvus:"venelane", kus:"Venemaal", rahvused:"venelased", ru:"Россия", ruNat:"русский", ruNats:"русские", ruKus:"в России" },
+  { riik:"Prantsusmaa", rahvus:"prantslane", kus:"Prantsusmaal", rahvused:"prantslased", ru:"Франция", ruNat:"француз", ruNats:"французы", ruKus:"во Франции" },
+  { riik:"Hispaania", rahvus:"hispaanlane", kus:"Hispaanias", rahvused:"hispaanlased", ru:"Испания", ruNat:"испанец", ruNats:"испанцы", ruKus:"в Испании" },
+  { riik:"Soome", rahvus:"soomlane", kus:"Soomes", rahvused:"soomlased", ru:"Финляндия", ruNat:"финн", ruNats:"финны", ruKus:"в Финляндии" },
+  { riik:"Ukraina", rahvus:"ukrainlane", kus:"Ukrainas", rahvused:"ukrainlased", ru:"Украина", ruNat:"украинец", ruNats:"украинцы", ruKus:"в Украине" },
+  { riik:"Leedu", rahvus:"leedulane", kus:"Leedus", rahvused:"leedulased", ru:"Литва", ruNat:"литовец", ruNats:"литовцы", ruKus:"в Литве" },
+  { riik:"Itaalia", rahvus:"itaallane", kus:"Itaalias", rahvused:"itaallased", ru:"Италия", ruNat:"итальянец", ruNats:"итальянцы", ruKus:"в Италии" },
+  { riik:"Norra", rahvus:"norralane", kus:"Norras", rahvused:"norralased", ru:"Норвегия", ruNat:"норвежец", ruNats:"норвежцы", ruKus:"в Норвегии" },
+  { riik:"Rootsi", rahvus:"rootslane", kus:"Rootsis", rahvused:"rootslased", ru:"Швеция", ruNat:"швед", ruNats:"шведы", ruKus:"в Швеции" },
+  { riik:"Eesti", rahvus:"eestlane", kus:"Eestis", rahvused:"eestlased", ru:"Эстония", ruNat:"эстонец", ruNats:"эстонцы", ruKus:"в Эстонии" },
+  { riik:"Läti", rahvus:"lätlane", kus:"Lätis", rahvused:"lätlased", ru:"Латвия", ruNat:"латыш", ruNats:"латыши", ruKus:"в Латвии" },
 ];
 
 // Russian label for each Estonian value (for option subtitles)
@@ -656,20 +697,85 @@ function getRussianFor(estValue, field) {
   switch(field) {
     case 'riik': return c.ru;
     case 'rahvus': return c.ruNat;
-    case 'kus': return 'в ' + c.ru;  // simplified
+    case 'kus': return c.ruKus;
     case 'rahvused': return c.ruNats;
     default: return '';
   }
 }
 
+// ── WORD-LEVEL QUESTION TYPES ──
 const Q_TYPES = [
-  { id:"riik2rahvus", q: d => `Житель страны «${d.riik}»?`, a: d => d.rahvus, field:"rahvus", hint: d => d.ru },
-  { id:"riik2kus", q: d => `Kus? — В стране «${d.riik}»?`, a: d => d.kus, field:"kus", hint: d => d.ru },
-  { id:"riik2rahvused", q: d => `Жители «${d.riik}» (мн.ч.)?`, a: d => d.rahvused, field:"rahvused", hint: d => d.ru },
-  { id:"rahvus2riik", q: d => `Откуда «${d.rahvus}»?`, a: d => d.riik, field:"riik", hint: d => d.ruNat },
-  { id:"kus2riik", q: d => `«${d.kus}» — какая страна?`, a: d => d.riik, field:"riik", hint: d => 'в ' + d.ru },
-  { id:"rahvused2riik", q: d => `«${d.rahvused}» — какая страна?`, a: d => d.riik, field:"riik", hint: d => d.ruNats },
+  { id:"riik2rahvus", q: d => `Житель страны «${d.riik}»?`, a: d => d.rahvus, field:"rahvus" },
+  { id:"riik2kus", q: d => `Kus? — В стране «${d.riik}»?`, a: d => d.kus, field:"kus" },
+  { id:"riik2rahvused", q: d => `Жители «${d.riik}» (мн.ч.)?`, a: d => d.rahvused, field:"rahvused" },
+  { id:"rahvus2riik", q: d => `Откуда «${d.rahvus}»?`, a: d => d.riik, field:"riik" },
+  { id:"kus2riik", q: d => `«${d.kus}» — какая страна?`, a: d => d.riik, field:"riik" },
+  { id:"rahvused2riik", q: d => `«${d.rahvused}» — какая страна?`, a: d => d.riik, field:"riik" },
 ];
+
+// ── SENTENCE TEMPLATES (RU→ET) ──
+// Each template: { ru: Russian prompt, et: Estonian sentence with {gap}, answer: field to fill, field: for options }
+function getSentenceTypes() {
+  return [
+    // Ma arvan, et ta on ... (I think he/she is [nationality])
+    { id:"s_arvan_ta",
+      ru: d => `Я думаю, что он/она — ${d.ruNat}.`,
+      et: d => `Ma arvan, et ta on <gap>.`,
+      a: d => d.rahvus, field:"rahvus" },
+    // Ma arvan, et nad on ... (I think they are [nationalities])
+    { id:"s_arvan_nad",
+      ru: d => `Я думаю, что они — ${d.ruNats}.`,
+      et: d => `Ma arvan, et nad on <gap>.`,
+      a: d => d.rahvused, field:"rahvused" },
+    // Ma elan ... (I live in [country])
+    { id:"s_elan",
+      ru: d => `Я живу ${d.ruKus}.`,
+      et: d => `Ma elan <gap>.`,
+      a: d => d.kus, field:"kus" },
+    // Ta elab ... (He/she lives in [country])
+    { id:"s_elab",
+      ru: d => `Он/она живёт ${d.ruKus}.`,
+      et: d => `Ta elab <gap>.`,
+      a: d => d.kus, field:"kus" },
+    // Ma olen ..., aga ma elan ... (I am [nat], but I live in [country])
+    // Two-part: we test the kus part, show rahvus as given
+    { id:"s_olen_aga",
+      ru: d => {
+        const other = COUNTRIES.filter(c => c.riik !== d.riik);
+        const dest = other[Math.floor(Math.random() * other.length)];
+        // store for answer
+        d._dest = dest;
+        return `Я — ${d.ruNat}, но я живу ${dest.ruKus}.`;
+      },
+      et: d => `Ma olen ${d.rahvus}, aga ma elan <gap>.`,
+      a: d => d._dest.kus, field:"kus",
+      prep: d => {
+        const other = COUNTRIES.filter(c => c.riik !== d.riik);
+        d._dest = other[Math.floor(Math.random() * other.length)];
+      }
+    },
+    // Nad on ... (They are [nationalities])
+    { id:"s_nad_on",
+      ru: d => `Они — ${d.ruNats}.`,
+      et: d => `Nad on <gap>.`,
+      a: d => d.rahvused, field:"rahvused" },
+    // ... elavad ... (nationals live in country)
+    { id:"s_elavad",
+      ru: d => `${d.ruNats.charAt(0).toUpperCase() + d.ruNats.slice(1)} живут ${d.ruKus}.`,
+      et: d => `${d.rahvused.charAt(0).toUpperCase() + d.rahvused.slice(1)} elavad <gap>.`,
+      a: d => d.kus, field:"kus" },
+    // Kus sa elad? — ... (Where do you live? — In [country])
+    { id:"s_kus_elad",
+      ru: d => `Где ты живёшь? — ${d.ruKus.charAt(0).toUpperCase() + d.ruKus.slice(1)}.`,
+      et: d => `Kus sa elad? — <gap>.`,
+      a: d => d.kus, field:"kus" },
+    // Ta on ... (He/she is [nationality])
+    { id:"s_ta_on",
+      ru: d => `Он/она — ${d.ruNat}.`,
+      et: d => `Ta on <gap>.`,
+      a: d => d.rahvus, field:"rahvus" },
+  ];
+}
 
 // ── STATE ──
 let questions = [];
@@ -683,9 +789,9 @@ let hintsSkip = 2;
 let hintsFirst = 3;
 let answered = false;
 let totalAnswered = 0;
-const BASE_Q = 24;       // base questions
-const CHOICE_ROUNDS = 12; // first 12 = choice, rest = typing
-let retryQueue = [];      // spaced repetition: wrong answers re-appear
+const BASE_Q = 30;
+const CHOICE_ROUNDS = 10;
+const SENTENCE_START = 20; // questions 20+ are sentence-based
 
 function shuffle(arr) {
   const a = [...arr];
@@ -708,6 +814,7 @@ function makeQuestion(country, qtype, isTyping) {
   }
   const options = shuffle([correctAnswer, ...wrongs]);
   return {
+    type: 'word',
     text: qtype.q(country),
     answer: correctAnswer,
     options,
@@ -719,16 +826,74 @@ function makeQuestion(country, qtype, isTyping) {
   };
 }
 
+function makeSentenceQuestion(country, stype, isTyping) {
+  // Prep if needed (for olen_aga pattern)
+  if (stype.prep) stype.prep(country);
+
+  const correctAnswer = stype.a(country);
+  const ruText = stype.ru(country);
+  const etTemplate = stype.et(country);
+
+  // Generate wrong options
+  const wrongCountries = shuffle(COUNTRIES.filter(c => {
+    // For olen_aga, we need different dest countries
+    if (stype.id === 's_olen_aga') {
+      const other = COUNTRIES.filter(x => x.riik !== c.riik);
+      const dest = other[Math.floor(Math.random() * other.length)];
+      return dest.kus !== correctAnswer;
+    }
+    return stype.a(c) !== correctAnswer;
+  }));
+  const wrongs = [];
+  const seen = new Set([correctAnswer]);
+  for (const c of wrongCountries) {
+    let v;
+    if (stype.id === 's_olen_aga') {
+      // pick random other country for wrong kus
+      const other = COUNTRIES.filter(x => x.riik !== c.riik);
+      v = other[Math.floor(Math.random() * other.length)].kus;
+    } else {
+      v = stype.a(c);
+    }
+    if (!seen.has(v)) { wrongs.push(v); seen.add(v); }
+    if (wrongs.length >= 3) break;
+  }
+  const options = shuffle([correctAnswer, ...wrongs]);
+
+  return {
+    type: 'sentence',
+    ruPrompt: ruText,
+    etTemplate,
+    answer: correctAnswer,
+    options,
+    isTyping,
+    field: stype.field,
+    country,
+    stype,
+    isRetry: false
+  };
+}
+
 function generateQuestions() {
   const qs = [];
-  // Ensure every country appears at least once in first batch
   const shuffledCountries = shuffle([...COUNTRIES]);
+  const sentenceTypes = getSentenceTypes();
+
   for (let i = 0; i < BASE_Q; i++) {
     const country = i < COUNTRIES.length
       ? shuffledCountries[i]
       : COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
-    const qtype = Q_TYPES[Math.floor(Math.random() * Q_TYPES.length)];
-    qs.push(makeQuestion(country, qtype, i >= CHOICE_ROUNDS));
+
+    if (i >= SENTENCE_START) {
+      // Sentence-based questions (mix of choice and typing)
+      const stype = sentenceTypes[Math.floor(Math.random() * sentenceTypes.length)];
+      const isTyping = i >= SENTENCE_START + 4; // first 4 sentences = choice, rest = typing
+      qs.push(makeSentenceQuestion(country, stype, isTyping));
+    } else {
+      // Word-level questions
+      const qtype = Q_TYPES[Math.floor(Math.random() * Q_TYPES.length)];
+      qs.push(makeQuestion(country, qtype, i >= CHOICE_ROUNDS));
+    }
   }
   return qs;
 }
@@ -744,7 +909,6 @@ function showScreen(id) {
 
 function startGame() {
   questions = generateQuestions();
-  retryQueue = [];
   current = 0;
   correctTotal = 0;
   wrongTotal = 0;
@@ -786,21 +950,45 @@ function renderQuestion() {
   void card.offsetWidth;
   card.classList.add('animate-in');
 
+  // Header
   document.getElementById('qNumber').textContent = q.isRetry
-    ? `Повтор ошибки`
+    ? 'Повтор ошибки'
     : `Вопрос ${current + 1}`;
   const modeEl = document.getElementById('qMode');
   if (q.isRetry) {
     modeEl.textContent = '🔁 Закрепление';
     modeEl.className = 'q-mode typing';
+  } else if (q.type === 'sentence') {
+    modeEl.textContent = q.isTyping ? '✍️ Предложение' : '📝 Предложение';
+    modeEl.className = 'q-mode sentence';
   } else {
     modeEl.textContent = q.isTyping ? 'Ввод' : 'Выбор';
     modeEl.className = q.isTyping ? 'q-mode typing' : 'q-mode';
   }
-  document.getElementById('qText').textContent = q.text;
-  document.getElementById('qHintText').textContent = '';
+
+  const qTextEl = document.getElementById('qText');
+  const qHintEl = document.getElementById('qHintText');
+  qHintEl.textContent = '';
   document.getElementById('correctReveal').textContent = '';
   document.getElementById('nextBtn').style.display = 'none';
+
+  if (q.type === 'sentence') {
+    // Show Russian prompt + Estonian template with gap
+    const ruDiv = document.createElement('div');
+    ruDiv.className = 'q-ru-prompt';
+    ruDiv.textContent = '🇷🇺 ' + q.ruPrompt;
+
+    const etParts = q.etTemplate.split('<gap>');
+    qTextEl.innerHTML = '';
+    const sentDiv = document.createElement('div');
+    sentDiv.className = 'q-sentence';
+    sentDiv.innerHTML = `${etParts[0]}<span class="gap" id="gapSpan">???</span>${etParts[1] || ''}`;
+
+    qTextEl.appendChild(ruDiv);
+    qTextEl.appendChild(sentDiv);
+  } else {
+    qTextEl.textContent = q.text;
+  }
 
   const optWrap = document.getElementById('optionsWrap');
   const typeWrap = document.getElementById('typingWrap');
@@ -815,6 +1003,7 @@ function renderQuestion() {
     inp.value = '';
     inp.className = 'typing-input';
     inp.disabled = false;
+    inp.placeholder = q.type === 'sentence' ? 'Введите пропущенное слово...' : 'Введите ответ...';
     document.getElementById('typingSubmit').disabled = false;
     setTimeout(() => inp.focus(), 100);
   } else {
@@ -837,11 +1026,25 @@ function renderQuestion() {
   updateHintButtons();
 }
 
+function fillGap(text, isCorrect) {
+  const gap = document.getElementById('gapSpan');
+  if (gap) {
+    gap.textContent = text;
+    gap.classList.add('filled');
+    gap.style.color = isCorrect ? 'var(--accent)' : 'var(--danger)';
+  }
+}
+
 function selectOption(btn, selected) {
   if (answered) return;
   answered = true;
   const q = questions[current];
   const isCorrect = selected === q.answer;
+
+  // Fill gap for sentence questions
+  if (q.type === 'sentence') {
+    fillGap(q.answer, true);
+  }
 
   document.querySelectorAll('.option-btn').forEach(b => {
     b.disabled = true;
@@ -867,15 +1070,16 @@ function submitTyping() {
   inp.disabled = true;
   document.getElementById('typingSubmit').disabled = true;
   const q = questions[current];
-  // Accept with or without special chars, normalize ä/ö/ü
   const isCorrect = val === q.answer.toLowerCase();
 
   if (isCorrect) {
     inp.classList.add('correct');
+    if (q.type === 'sentence') fillGap(q.answer, true);
   } else {
     inp.classList.add('wrong');
     inp.classList.add('shake');
     document.getElementById('correctReveal').textContent = `Правильно: ${q.answer}`;
+    if (q.type === 'sentence') fillGap(q.answer, false);
   }
 
   processAnswer(isCorrect);
@@ -897,7 +1101,14 @@ function processAnswer(isCorrect) {
 
     // ── SPACED REPETITION: re-insert this question 4-6 positions later ──
     if (!q.isRetry) {
-      const retryQ = makeQuestion(q.country, q.qtype, q.isTyping);
+      let retryQ;
+      if (q.type === 'sentence') {
+        const sentenceTypes = getSentenceTypes();
+        const stype = sentenceTypes.find(s => s.id === q.stype.id) || sentenceTypes[0];
+        retryQ = makeSentenceQuestion(q.country, stype, q.isTyping);
+      } else {
+        retryQ = makeQuestion(q.country, q.qtype, q.isTyping);
+      }
       retryQ.isRetry = true;
       const insertAt = Math.min(current + 4 + Math.floor(Math.random() * 3), questions.length);
       questions.splice(insertAt, 0, retryQ);
@@ -949,12 +1160,14 @@ function useHintSkip() {
     document.getElementById('typingInput').disabled = true;
     document.getElementById('typingSubmit').disabled = true;
     document.getElementById('correctReveal').textContent = `Ответ: ${q.answer}`;
+    if (q.type === 'sentence') fillGap(q.answer, true);
   } else {
     document.querySelectorAll('.option-btn').forEach(b => {
       b.disabled = true;
       if (b.dataset.value === q.answer) b.classList.add('correct-answer');
       else b.classList.add('dimmed');
     });
+    if (q.type === 'sentence') fillGap(q.answer, true);
   }
 
   document.getElementById('nextBtn').style.display = 'block';
