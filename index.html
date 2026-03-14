@@ -23,10 +23,10 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .header h1{font-size:1.4rem;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .header .subtitle{font-size:0.8rem;color:var(--text-dim);margin-top:4px;font-family:'Space Mono',monospace;}
 
-.stats{display:flex;justify-content:space-between;gap:8px;margin:12px 0;}
-.stat-card{flex:1;background:var(--surface);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:10px 8px;text-align:center;}
-.stat-card .label{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);font-family:'Space Mono',monospace;}
-.stat-card .value{font-size:1.3rem;font-weight:700;margin-top:2px;}
+.stats{display:flex;justify-content:space-between;gap:6px;margin:6px 0;}
+.stat-card{flex:1;background:var(--surface);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:6px 6px;text-align:center;}
+.stat-card .label{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);font-family:'Space Mono',monospace;}
+.stat-card .value{font-size:1rem;font-weight:700;margin-top:1px;}
 .stat-card .value.correct{color:var(--accent);}.stat-card .value.wrong{color:var(--danger);}.stat-card .value.streak{color:var(--warning);}
 
 .progress-wrap{margin:8px 0 16px;}
@@ -153,8 +153,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 </div>
 
 <div id="gameScreen" class="screen">
-  <div class="header" style="position:relative;">
-    <h1>Riigid & Rahvused</h1><div class="subtitle">Эстонский тренажёр</div>
+  <div class="header" style="position:relative;padding:10px 0 0;">
     <button class="pause-btn" onclick="pauseGame()">⏸ Пауза</button>
   </div>
   <div class="stats">
