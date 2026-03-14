@@ -19,22 +19,19 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
   radial-gradient(ellipse at 70% 80%,rgba(0,184,212,0.04) 0%,transparent 50%);pointer-events:none;z-index:0;}
 .container{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:16px;min-height:100dvh;display:flex;flex-direction:column;}
 
-.header{text-align:center;padding:20px 0 12px;}
-.header h1{font-size:1.4rem;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.header .subtitle{font-size:0.8rem;color:var(--text-dim);margin-top:4px;font-family:'Space Mono',monospace;}
-
 .stats{display:flex;justify-content:space-between;gap:6px;margin:6px 0;}
 .stat-card{flex:1;background:var(--surface);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:6px 6px;text-align:center;}
-.stat-card .label{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);font-family:'Space Mono',monospace;}
+.stat-card .label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);font-family:'Space Mono',monospace;}
 .stat-card .value{font-size:1rem;font-weight:700;margin-top:1px;}
 .stat-card .value.correct{color:var(--accent);}.stat-card .value.wrong{color:var(--danger);}.stat-card .value.streak{color:var(--warning);}
+.pause-card{cursor:pointer;transition:all 0.2s;}.pause-card:active{transform:scale(0.95);}
 
 .progress-wrap{margin:8px 0 16px;}
-.progress-label{display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:6px;}
+.progress-label{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:6px;}
 .progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 0.5s cubic-bezier(0.22,1,0.36,1);width:0%;}
 .country-dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
-.country-dot{font-size:0.55rem;font-family:'Space Mono',monospace;padding:3px 7px;border-radius:6px;background:var(--surface2);color:var(--text-dim);border:1px solid rgba(255,255,255,0.04);transition:all 0.3s;white-space:nowrap;}
+.country-dot{font-size:0.7rem;font-family:'Space Mono',monospace;padding:3px 7px;border-radius:6px;background:var(--surface2);color:var(--text-dim);border:1px solid rgba(255,255,255,0.04);transition:all 0.3s;white-space:nowrap;}
 .country-dot.level1{border-color:rgba(255,183,77,0.3);color:var(--warning);}
 .country-dot.level2{border-color:rgba(0,184,212,0.3);color:var(--accent2);}
 .country-dot.mastered{border-color:rgba(0,229,160,0.4);color:var(--accent);background:rgba(0,229,160,0.08);}
@@ -67,11 +64,6 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .typing-submit:active{transform:scale(0.96);}.typing-submit:disabled{opacity:0.4;cursor:default;}
 .correct-reveal{font-size:0.85rem;color:var(--accent);font-family:'Space Mono',monospace;padding:8px 0;text-align:center;}
 
-.hints-bar{display:flex;gap:8px;margin-bottom:16px;}
-.hint-btn{flex:1;padding:8px 4px;background:var(--surface2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.65rem;cursor:pointer;transition:all 0.2s;text-align:center;}
-.hint-btn:active{transform:scale(0.95);}.hint-btn:disabled{opacity:0.25;cursor:default;}
-.hint-btn .hint-icon{font-size:1.1rem;display:block;margin-bottom:2px;}.hint-btn .hint-count{color:var(--accent);}
-
 .next-btn{margin-top:16px;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:var(--bg);font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:transform 0.15s;display:none;}
 .next-btn:active{transform:scale(0.96);}
 
@@ -82,7 +74,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .start-desc{color:var(--text-dim);font-size:0.9rem;line-height:1.6;max-width:300px;}
 .start-btn{padding:16px 48px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:var(--bg);font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;margin-top:12px;}
 .start-btn:active{transform:scale(0.95);}
-.start-info{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--text-dim);}
+.start-info{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--text-dim);}
 
 .result-screen{align-items:center;justify-content:center;text-align:center;gap:20px;padding:40px 20px;}
 .result-emoji{font-size:3.5rem;}.result-title{font-size:1.6rem;font-weight:800;}
@@ -107,9 +99,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .start-btns{display:flex;flex-direction:column;gap:10px;align-items:center;width:100%;max-width:280px;}
 .settings-link{color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.7rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px;transition:color 0.2s;}
 .settings-link:hover{color:var(--text);}
-.pause-btn{position:absolute;top:20px;right:0;background:none;border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text-dim);font-size:0.7rem;font-family:'Space Mono',monospace;padding:6px 12px;cursor:pointer;transition:all 0.2s;}
-.pause-btn:active{transform:scale(0.95);}
-.saved-badge{display:inline-block;font-size:0.6rem;font-family:'Space Mono',monospace;color:var(--accent);background:rgba(0,229,160,0.1);padding:2px 8px;border-radius:10px;margin-top:4px;}
+.saved-badge{display:inline-block;font-size:0.7rem;font-family:'Space Mono',monospace;color:var(--accent);background:rgba(0,229,160,0.1);padding:2px 8px;border-radius:10px;margin-top:4px;}
 
 /* ── SETTINGS SCREEN ── */
 .settings-screen{padding:30px 16px;gap:20px;}
@@ -123,7 +113,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .progress-row:last-child{border-bottom:none;}
 .progress-row .pr-country{font-size:0.85rem;font-weight:500;}
 .progress-row .pr-est{font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;}
-.progress-row .pr-level{font-size:0.65rem;font-family:'Space Mono',monospace;padding:3px 8px;border-radius:6px;}
+.progress-row .pr-level{font-size:0.7rem;font-family:'Space Mono',monospace;padding:3px 8px;border-radius:6px;}
 .pr-level.l0{background:var(--surface2);color:var(--text-dim);}
 .pr-level.l1{background:rgba(255,183,77,0.1);color:var(--warning);}
 .pr-level.l2{background:rgba(0,184,212,0.1);color:var(--accent2);}
@@ -133,7 +123,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .settings-stats{display:flex;gap:12px;margin-bottom:16px;}
 .settings-stats .ss{flex:1;text-align:center;}
 .settings-stats .ss .ss-val{font-size:1.4rem;font-weight:700;}
-.settings-stats .ss .ss-lbl{font-size:0.6rem;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;}
+.settings-stats .ss .ss-lbl{font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;}
 </style>
 </head>
 <body>
@@ -153,13 +143,11 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 </div>
 
 <div id="gameScreen" class="screen">
-  <div class="header" style="position:relative;padding:10px 0 0;">
-    <button class="pause-btn" onclick="pauseGame()">⏸ Пауза</button>
-  </div>
-  <div class="stats">
+  <div class="stats" style="margin-top:16px;">
     <div class="stat-card"><div class="label">Верно</div><div class="value correct" id="correctCount">0</div></div>
     <div class="stat-card"><div class="label">Ошибки</div><div class="value wrong" id="wrongCount">0</div></div>
     <div class="stat-card"><div class="label">Серия</div><div class="value streak" id="streakCount">0</div></div>
+    <div class="stat-card pause-card" onclick="pauseGame()"><div class="label">⏸</div><div class="value" style="font-size:0.7rem;color:var(--text-dim);">Пауза</div></div>
   </div>
   <div class="progress-wrap">
     <div class="progress-label"><span id="progressText">Освоено 0 / 13</span><span id="progressPercent">0%</span></div>
@@ -169,11 +157,6 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
   <div class="question-card" id="questionCard">
     <div class="q-text" id="qText"></div>
     <div class="q-hint-text" id="qHintText"></div>
-    <div class="hints-bar">
-      <button class="hint-btn" id="hint5050" onclick="useHint5050()"><span class="hint-icon">✂️</span>50/50 <span class="hint-count" id="hint5050count">(3)</span></button>
-      <button class="hint-btn" id="hintSkip" onclick="useHintSkip()"><span class="hint-icon">⏭️</span>Пропуск <span class="hint-count" id="hintSkipCount">(2)</span></button>
-      <button class="hint-btn" id="hintFirst" onclick="useHintFirst()"><span class="hint-icon">💡</span>Буква <span class="hint-count" id="hintFirstCount">(3)</span></button>
-    </div>
     <div class="options" id="optionsWrap"></div>
     <div class="typing-area" id="typingWrap" style="display:none">
       <input type="text" class="typing-input" id="typingInput" placeholder="Введите ответ..." autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -284,7 +267,7 @@ function hasSave() { return !!loadProgress(); }
 
 // ── STATE ──
 let cState={},curQ=null,correct=0,wrong=0,streak=0,best=0,total=0;
-let h50=3,hSkip=2,hFirst=3,ans=false;
+let ans=false;
 const UP=2,MAXLVL=2;
 
 function initFresh(){cState={};COUNTRIES.forEach(c=>cState[c.riik]={level:0,streak:0,done:false});}
@@ -332,7 +315,7 @@ function startGame(resume){
   } else {
     initFresh(); correct=0; wrong=0; best=0; total=0;
   }
-  streak=0; h50=3; hSkip=2; hFirst=3;
+  streak=0;
   showScr('gameScreen'); renderDots(); nextQuestion();
 }
 
@@ -382,15 +365,6 @@ function updStats(){
   document.getElementById('progressFill').style.width=`${pct}%`;
 }
 
-function updHints(){
-  document.getElementById('hint5050count').textContent=`(${h50})`;
-  document.getElementById('hintSkipCount').textContent=`(${hSkip})`;
-  document.getElementById('hintFirstCount').textContent=`(${hFirst})`;
-  document.getElementById('hint5050').disabled=h50<=0||ans;
-  document.getElementById('hintSkip').disabled=hSkip<=0||ans;
-  document.getElementById('hintFirst').disabled=hFirst<=0||ans;
-}
-
 function render(){
   ans=false;const q=curQ,card=document.getElementById('questionCard');
   card.classList.remove('animate-in');void card.offsetWidth;card.classList.add('animate-in');
@@ -408,8 +382,6 @@ function render(){
   }else{qT.textContent=q.text;}
 
   const oW=document.getElementById('optionsWrap'),tW=document.getElementById('typingWrap');
-  document.getElementById('hint5050').style.display=q.isTyping?'none':'';
-  document.getElementById('hintFirst').style.display=q.isTyping?'':'none';
 
   if(q.isTyping){
     oW.style.display='none';tW.style.display='flex';
@@ -427,7 +399,7 @@ function render(){
       b.onclick=()=>selOpt(b,opt);b.style.animationDelay=`${i*60}ms`;oW.appendChild(b);
     });
   }
-  updStats();updHints();
+  updStats();
 }
 
 function fillGap(t,ok){const g=document.getElementById('gapSpan');if(g){g.textContent=t;g.classList.add('filled');g.style.color=ok?'var(--accent)':'var(--danger)';}}
@@ -466,7 +438,7 @@ function proc(ok){
     wrong++;streak=0;s.streak=0;
     if(s.level>0){s.level--;showToast(`${q.country.ru} ← уровень ${s.level+1}`,'var(--danger)');}
   }
-  updDot(r);updStats();updHints();
+  updDot(r);updStats();
   saveProgress(); // auto-save after each answer
   document.getElementById('nextBtn').style.display='block';
   document.getElementById('nextBtn').textContent=isDone()?'Результаты →':'Далее →';
@@ -476,26 +448,6 @@ function nextQuestion(){
   if(isDone()){clearProgress();showResults();return;}
   curQ=genNext();if(!curQ){clearProgress();showResults();return;}
   render();
-}
-
-// ── HINTS ──
-function useHint5050(){
-  if(h50<=0||ans)return;h50--;
-  shuffle([...document.querySelectorAll('.option-btn')].filter(b=>b.dataset.value!==curQ.answer)).slice(0,2).forEach(b=>{b.classList.add('dimmed');b.disabled=true;});
-  updHints();showToast('Убраны 2 варианта','var(--warning)');
-}
-function useHintSkip(){
-  if(hSkip<=0||ans)return;hSkip--;ans=true;const q=curQ;
-  if(q.isTyping){document.getElementById('typingInput').disabled=true;document.getElementById('typingSubmit').disabled=true;
-    document.getElementById('correctReveal').textContent=`Ответ: ${q.answer}`;if(q.type==='sentence')fillGap(q.answer,true);}
-  else{document.querySelectorAll('.option-btn').forEach(b=>{b.disabled=true;if(b.dataset.value===q.answer)b.classList.add('correct-answer');else b.classList.add('dimmed');});if(q.type==='sentence')fillGap(q.answer,true);}
-  document.getElementById('nextBtn').style.display='block';document.getElementById('nextBtn').textContent='Далее →';
-  updHints();showToast('Пропущено','var(--warning)');
-}
-function useHintFirst(){
-  if(hFirst<=0||ans)return;hFirst--;
-  document.getElementById('qHintText').textContent=`Подсказка: ${curQ.answer.slice(0,Math.ceil(curQ.answer.length*0.4))}...`;
-  updHints();
 }
 
 // ── SETTINGS ──
