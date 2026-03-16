@@ -1,52 +1,54 @@
-# 🇪🇪 Riigid & Rahvused
+# 🇪🇪 Countries & Nationalities (Estonian)
 
-Интерактивный тренажёр для изучения эстонских названий стран, национальностей и падежных форм.
+An interactive trainer for learning **Estonian country names, nationalities, and case forms**.
 
-**[▶ Играть](https://vicso-name.github.io/riigid-rahvused/)**
+**[▶ Play](https://vicso-name.github.io/riigid-rahvused/)**
 
-## Что тренируем
+## What You Practice
 
-| Категория | Пример |
-|-----------|--------|
-| Riik (страна) | Inglismaa, Saksamaa, Eesti... |
-| Rahvus (национальность) | inglane, sakslane, eestlane... |
-| Kus? (где?) | Inglismaal, Saksamaal, Eestis... |
-| Rahvused (мн.ч.) | inglased, sakslased, eestlased... |
+| Category | Example |
+|--------|--------|
+| Country (Riik) | Inglismaa, Saksamaa, Eesti... |
+| Nationality (Rahvus) | inglane, sakslane, eestlane... |
+| Location (Kus? — where?) | Inglismaal, Saksamaal, Eestis... |
+| Nationalities (plural) | inglased, sakslased, eestlased... |
 
-13 стран · 3 уровня сложности · адаптивная прогрессия
+13 countries · 3 difficulty levels · adaptive progression
 
-## Как работает
+## How It Works
 
-Каждая из 13 стран проходит через 3 уровня независимо:
+Each of the **13 countries** progresses independently through **3 levels**:
 
-1. **Уровень 1** — выбор из 4 вариантов (с русскими подписями)
-2. **Уровень 2** — ввод ответа вручную
-3. **Уровень 3** — предложения RU→ET (`Ma arvan, et ta on ___`)
+1. **Level 1** — multiple choice (4 options with Russian hints)
+2. **Level 2** — type the answer manually
+3. **Level 3** — RU → ET sentence completion (`Ma arvan, et ta on ___`)
 
-- 2 правильных подряд → уровень вверх
-- 1 ошибка → уровень вниз
-- Цель — освоить все 13 стран
+Progression rules:
 
-Прогресс сохраняется в браузере — можно прервать сессию и вернуться позже.
+- 2 correct answers in a row → level up
+- 1 mistake → level down
+- Goal: master all 13 countries
 
-## Фичи
+Progress is saved in the browser, so you can stop a session and continue later.
 
-- Адаптивная сложность по каждой стране
-- 9 шаблонов предложений (RU→ET)
-- Русские подписи в вариантах ответа (scaffolding)
-- Подсказки: 50/50, пропуск, первые буквы
-- Сохранение прогресса (localStorage)
-- Пауза / продолжение сессии
-- Экран настроек с детальным прогрессом по странам
+## Features
 
-## Технологии
+- Adaptive difficulty for each country
+- 9 sentence templates (RU → ET)
+- Russian hints in answer options (scaffolding)
+- Hints: 50/50, skip, first letters
+- Progress saving (localStorage)
+- Pause / resume session
+- Settings screen with detailed country progress
 
-- Чистый HTML + CSS + JavaScript (один файл)
-- Zero dependencies
-- Mobile-first, работает оффлайн
-- Статический хостинг (GitHub Pages)
+## Technology
 
-## Запуск локально
+- Pure **HTML + CSS + JavaScript** (single file)
+- **Zero dependencies**
+- **Mobile-first**, works offline
+- Static hosting (GitHub Pages)
+
+## Run Locally
 
 ```bash
 git clone https://github.com/vicso-name/riigid-rahvused.git
@@ -54,8 +56,8 @@ cd riigid-rahvused
 open index.html
 ```
 
-Или просто открой `index.html` в браузере.
+Or simply open `index.html` in your browser.
 
-## Лицензия
+## License
 
 [MIT](LICENSE)

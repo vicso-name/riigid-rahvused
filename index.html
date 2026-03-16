@@ -42,11 +42,11 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .country-dot.level2{border-color:rgba(0,184,212,0.3);color:var(--accent2);}
 .country-dot.mastered{border-color:rgba(0,229,160,0.4);color:var(--accent);background:rgba(0,229,160,0.08);}
 
-.question-card{background:var(--surface);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);padding:24px 20px;flex:1;display:flex;flex-direction:column;box-shadow:var(--glow);}
+.question-card{background:var(--surface);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);padding:24px 20px;display:flex;flex-direction:column;box-shadow:var(--glow);}
 .q-text{font-size:1.15rem;font-weight:600;line-height:1.5;margin-bottom:6px;}
 .q-hint-text{font-size:0.8rem;color:var(--text-dim);margin-bottom:20px;font-style:italic;}
 
-.options{display:flex;flex-direction:column;gap:10px;margin-top:auto;}
+.options{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
 .option-btn{width:100%;padding:14px 16px;background:var(--surface2);border:1.5px solid rgba(255,255,255,0.06);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:all 0.2s;text-align:left;position:relative;overflow:hidden;}
 .option-btn:active{transform:scale(0.97);}
 .option-btn.correct-answer{border-color:var(--accent);background:rgba(0,229,160,0.12);}
@@ -61,7 +61,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .q-sentence .gap.filled{border-bottom-style:solid;}
 .q-ru-prompt{font-size:0.82rem;color:var(--text-dim);margin-bottom:16px;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:10px;border-left:3px solid var(--accent2);line-height:1.5;}
 
-.typing-area{margin-top:auto;display:flex;flex-direction:column;gap:12px;}
+.typing-area{display:flex;flex-direction:column;gap:12px;margin-top:16px;}
 .typing-input{width:100%;padding:14px 16px;background:var(--surface2);border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:1.05rem;outline:none;transition:border-color 0.2s;}
 .typing-input:focus{border-color:var(--accent2);}
 .typing-input.correct{border-color:var(--accent);background:rgba(0,229,160,0.08);}
@@ -462,8 +462,28 @@ function showAudioRow(answer) {
   const label = document.getElementById('audioAnswer');
   label.textContent = answer;
   row.style.display = 'flex';
-  // Auto-play the answer
-  setTimeout(() => playAnswer(), 300);
+  // Auto-play, show next button only after audio ends
+  setTimeout(() => {
+    if (!curQ) return;
+    const file = getAudioFile(curQ.answer);
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    currentAudio = new Audio(file);
+    const btn = document.getElementById('audioBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    btn.classList.add('playing');
+    currentAudio.onended = () => {
+      btn.classList.remove('playing');
+      nextBtn.style.display = 'block';
+    };
+    currentAudio.onerror = () => {
+      btn.classList.remove('playing');
+      nextBtn.style.display = 'block';
+    };
+    currentAudio.play().catch(() => {
+      btn.classList.remove('playing');
+      nextBtn.style.display = 'block';
+    });
+  }, 300);
 }
 
 function hideAudioRow() {
@@ -487,7 +507,6 @@ function proc(ok){
   updDot(r);updStats();
   saveProgress();
   showAudioRow(q.answer);
-  document.getElementById('nextBtn').style.display='block';
   document.getElementById('nextBtn').textContent=isDone()?'Результаты →':'Далее →';
 }
 
