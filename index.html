@@ -1,602 +1,155 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Riigid & Rahvused — Эстонский тренажёр</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #0a0e1a; --surface: #131929; --surface2: #1a2236;
-  --accent: #00e5a0; --accent2: #00b8d4; --danger: #ff5c6c; --warning: #ffb74d;
-  --text: #e8ecf4; --text-dim: #6b7a99; --radius: 14px;
-  --glow: 0 0 30px rgba(0,229,160,0.15);
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
-body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
-  background:radial-gradient(ellipse at 30% 20%,rgba(0,229,160,0.06) 0%,transparent 50%),
-  radial-gradient(ellipse at 70% 80%,rgba(0,184,212,0.04) 0%,transparent 50%);pointer-events:none;z-index:0;}
-.container{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:16px;min-height:100dvh;display:flex;flex-direction:column;}
-
-.stats{display:flex;justify-content:space-between;gap:6px;margin:6px 0;}
-.stat-card{flex:1;background:var(--surface);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:6px 6px;text-align:center;}
-.stat-card .label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);font-family:'Space Mono',monospace;}
-.stat-card .value{font-size:1rem;font-weight:700;margin-top:1px;}
-.stat-card .value.correct{color:var(--accent);}.stat-card .value.wrong{color:var(--danger);}.stat-card .value.streak{color:var(--warning);}
-.pause-card{cursor:pointer;transition:all 0.2s;}.pause-card:active{transform:scale(0.95);}
-
-.audio-row{display:flex;gap:10px;align-items:center;margin-top:12px;display:none;}
-.audio-btn{flex:0 0 auto;width:48px;height:48px;border-radius:50%;background:rgba(0,184,212,0.12);border:1.5px solid rgba(0,184,212,0.3);color:var(--accent2);font-size:1.3rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
-.audio-btn:active{transform:scale(0.9);}
-.audio-btn.playing{background:rgba(0,184,212,0.25);}
-.audio-answer{font-size:0.95rem;font-weight:600;color:var(--accent);font-family:'Space Mono',monospace;}
-
-.progress-wrap{margin:8px 0 16px;}
-.progress-label{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:6px;}
-.progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 0.5s cubic-bezier(0.22,1,0.36,1);width:0%;}
-.country-dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
-.country-dot{font-size:0.7rem;font-family:'Space Mono',monospace;padding:3px 7px;border-radius:6px;background:var(--surface2);color:var(--text-dim);border:1px solid rgba(255,255,255,0.04);transition:all 0.3s;white-space:nowrap;}
-.country-dot.level1{border-color:rgba(255,183,77,0.3);color:var(--warning);}
-.country-dot.level2{border-color:rgba(0,184,212,0.3);color:var(--accent2);}
-.country-dot.mastered{border-color:rgba(0,229,160,0.4);color:var(--accent);background:rgba(0,229,160,0.08);}
-
-.question-card{background:var(--surface);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);padding:24px 20px;display:flex;flex-direction:column;box-shadow:var(--glow);}
-.q-text{font-size:1.15rem;font-weight:600;line-height:1.5;margin-bottom:6px;}
-.q-hint-text{font-size:0.8rem;color:var(--text-dim);margin-bottom:20px;font-style:italic;}
-
-.options{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
-.option-btn{width:100%;padding:14px 16px;background:var(--surface2);border:1.5px solid rgba(255,255,255,0.06);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:all 0.2s;text-align:left;position:relative;overflow:hidden;}
-.option-btn:active{transform:scale(0.97);}
-.option-btn.correct-answer{border-color:var(--accent);background:rgba(0,229,160,0.12);}
-.option-btn.wrong-answer{border-color:var(--danger);background:rgba(255,92,108,0.12);}
-.option-btn.dimmed{opacity:0.3;}
-.option-btn:disabled{cursor:default;}
-.option-btn .opt-est{display:block;}
-.option-btn .opt-ru{display:block;font-size:0.72rem;color:var(--text-dim);font-weight:400;margin-top:2px;}
-
-.q-sentence{font-size:1.05rem;font-weight:400;line-height:1.7;margin-bottom:6px;}
-.q-sentence .gap{display:inline-block;min-width:80px;border-bottom:2px dashed var(--accent);color:var(--accent);font-weight:600;text-align:center;padding:0 4px;margin:0 2px;}
-.q-sentence .gap.filled{border-bottom-style:solid;}
-.q-ru-prompt{font-size:0.82rem;color:var(--text-dim);margin-bottom:16px;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:10px;border-left:3px solid var(--accent2);line-height:1.5;}
-
-.typing-area{display:flex;flex-direction:column;gap:12px;margin-top:16px;}
-.typing-input{width:100%;padding:14px 16px;background:var(--surface2);border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:1.05rem;outline:none;transition:border-color 0.2s;}
-.typing-input:focus{border-color:var(--accent2);}
-.typing-input.correct{border-color:var(--accent);background:rgba(0,229,160,0.08);}
-.typing-input.wrong{border-color:var(--danger);background:rgba(255,92,108,0.08);}
-.typing-submit{padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:var(--bg);font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:transform 0.15s,opacity 0.2s;}
-.typing-submit:active{transform:scale(0.96);}.typing-submit:disabled{opacity:0.4;cursor:default;}
-.correct-reveal{font-size:0.85rem;color:var(--accent);font-family:'Space Mono',monospace;padding:8px 0;text-align:center;}
-
-.next-btn{margin-top:16px;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:var(--bg);font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:transform 0.15s;display:none;}
-.next-btn:active{transform:scale(0.96);}
-
-.screen{display:none;flex-direction:column;min-height:100dvh;}.screen.active{display:flex;}
-.start-screen{align-items:center;justify-content:center;text-align:center;gap:24px;padding:40px 20px;}
-.start-logo{font-size:3.5rem;line-height:1;}
-.start-title{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.start-desc{color:var(--text-dim);font-size:0.9rem;line-height:1.6;max-width:300px;}
-.start-btn{padding:16px 48px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:var(--bg);font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;margin-top:12px;}
-.start-btn:active{transform:scale(0.95);}
-.start-info{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--text-dim);}
-
-.result-screen{align-items:center;justify-content:center;text-align:center;gap:20px;padding:40px 20px;}
-.result-emoji{font-size:3.5rem;}.result-title{font-size:1.6rem;font-weight:800;}
-.result-stats{display:flex;gap:20px;}.result-stat{text-align:center;}
-.result-stat .big{font-size:2rem;font-weight:700;}.result-stat .small{font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;}
-.result-bar{width:100%;max-width:280px;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
-.result-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s cubic-bezier(0.22,1,0.36,1);}
-.restart-btn{padding:14px 40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:var(--bg);font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px;}
-.restart-btn:active{transform:scale(0.95);}
-
-@keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
-.animate-in{animation:fadeInUp 0.4s cubic-bezier(0.22,1,0.36,1) forwards;}
-.shake{animation:shake 0.4s ease;}
-
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:12px 24px;border-radius:12px;font-size:0.85rem;font-weight:500;z-index:100;transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);pointer-events:none;}
-.toast.show{transform:translateX(-50%) translateY(0);}
-
-/* ── CONTINUE / SECONDARY BUTTONS ── */
-.continue-btn{padding:16px 48px;background:transparent;border:2px solid var(--accent);border-radius:14px;color:var(--accent);font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
-.continue-btn:active{transform:scale(0.95);}
-.start-btns{display:flex;flex-direction:column;gap:10px;align-items:center;width:100%;max-width:280px;}
-.settings-link{color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.7rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px;transition:color 0.2s;}
-.settings-link:hover{color:var(--text);}
-.saved-badge{display:inline-block;font-size:0.7rem;font-family:'Space Mono',monospace;color:var(--accent);background:rgba(0,229,160,0.1);padding:2px 8px;border-radius:10px;margin-top:4px;}
-
-/* ── SETTINGS SCREEN ── */
-.settings-screen{padding:30px 16px;gap:20px;}
-.settings-header{display:flex;align-items:center;gap:12px;}
-.back-btn{background:none;border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text-dim);font-size:0.8rem;padding:8px 14px;cursor:pointer;font-family:'Space Mono',monospace;}
-.back-btn:active{transform:scale(0.95);}
-.settings-title{font-size:1.2rem;font-weight:700;}
-.settings-section{background:var(--surface);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius);padding:20px;}
-.settings-section h3{font-size:0.85rem;font-weight:600;margin-bottom:14px;}
-.progress-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
-.progress-row:last-child{border-bottom:none;}
-.progress-row .pr-country{font-size:0.85rem;font-weight:500;}
-.progress-row .pr-est{font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;}
-.progress-row .pr-level{font-size:0.7rem;font-family:'Space Mono',monospace;padding:3px 8px;border-radius:6px;}
-.pr-level.l0{background:var(--surface2);color:var(--text-dim);}
-.pr-level.l1{background:rgba(255,183,77,0.1);color:var(--warning);}
-.pr-level.l2{background:rgba(0,184,212,0.1);color:var(--accent2);}
-.pr-level.done{background:rgba(0,229,160,0.1);color:var(--accent);}
-.reset-btn{width:100%;padding:14px;background:transparent;border:1.5px solid var(--danger);border-radius:12px;color:var(--danger);font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.reset-btn:active{transform:scale(0.95);background:rgba(255,92,108,0.1);}
-.settings-stats{display:flex;gap:12px;margin-bottom:16px;}
-.settings-stats .ss{flex:1;text-align:center;}
-.settings-stats .ss .ss-val{font-size:1.4rem;font-weight:700;}
-.settings-stats .ss .ss-lbl{font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#f59e0b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Riigid" />
+  <title>Riigid & Rahvused — Эстонский тренажёр</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="container">
+  <div class="container">
 
-<div id="startScreen" class="screen start-screen active">
-  <div class="start-logo">🇪🇪</div>
-  <h1 class="start-title">Riigid & Rahvused</h1>
-  <p class="start-desc">Каждая страна проходит 3 уровня:<br>выбор → ввод → предложения.<br>Ошибся — уровень вниз. Цель — освоить все 13.</p>
-  <div class="start-btns">
-    <button class="start-btn" onclick="startGame(false)">Новая игра</button>
-    <button class="continue-btn" id="continueBtn" onclick="startGame(true)" style="display:none">Продолжить</button>
-  </div>
-  <div id="savedBadge" style="display:none"><span class="saved-badge" id="savedInfo"></span></div>
-  <p class="start-info">13 стран · 3 уровня · адаптивная сложность</p>
-  <span class="settings-link" onclick="showSettings()">⚙ Настройки и прогресс</span>
-</div>
-
-<div id="gameScreen" class="screen">
-  <div class="stats" style="margin-top:16px;">
-    <div class="stat-card"><div class="label">Верно</div><div class="value correct" id="correctCount">0</div></div>
-    <div class="stat-card"><div class="label">Ошибки</div><div class="value wrong" id="wrongCount">0</div></div>
-    <div class="stat-card"><div class="label">Серия</div><div class="value streak" id="streakCount">0</div></div>
-    <div class="stat-card pause-card" onclick="pauseGame()"><div class="label">⏸</div><div class="value" style="font-size:0.7rem;color:var(--text-dim);">Пауза</div></div>
-  </div>
-  <div class="progress-wrap">
-    <div class="progress-label"><span id="progressText">Освоено 0 / 13</span><span id="progressPercent">0%</span></div>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="country-dots" id="countryDots"></div>
-  </div>
-  <div class="question-card" id="questionCard">
-    <div class="q-text" id="qText"></div>
-    <div class="q-hint-text" id="qHintText"></div>
-    <div class="options" id="optionsWrap"></div>
-    <div class="typing-area" id="typingWrap" style="display:none">
-      <input type="text" class="typing-input" id="typingInput" placeholder="Введите ответ..." autocomplete="off" autocapitalize="off" spellcheck="false">
-      <button class="typing-submit" id="typingSubmit" onclick="submitTyping()">Ответить</button>
-      <div class="correct-reveal" id="correctReveal"></div>
+    <div id="startScreen" class="screen hero active">
+      <div class="start-logo">🇪🇪</div>
+      <h1 class="start-title"><span>Riigid & Rahvused</span></h1>
+      <p class="start-desc">Выучи 13 эстонских стран — названия, жителей, падежи «где» и множественное число.</p>
+      <div class="start-points">
+        <div class="start-point">
+          <div class="start-point-dot"></div>
+          <span>13 стран: Inglismaa, Soome, Eesti...</span>
+        </div>
+        <div class="start-point">
+          <div class="start-point-dot"></div>
+          <span>Жители: inglane, soomlane, eestlane</span>
+        </div>
+        <div class="start-point">
+          <div class="start-point-dot"></div>
+          <span>Где? · Мн. число · Предложения</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="startBtn">Начать Stage 1</button>
+      <button class="btn btn-secondary" id="studyBtn">Изучить материал</button>
+      <button class="btn btn-ghost" id="faqBtn" style="width:100%;margin-top:4px;">Как это работает?</button>
+      <p class="start-info">13 стран · 3 формы · 3 этапа · 39 навыков</p>
     </div>
-    <div class="audio-row" id="audioRow">
-      <button class="audio-btn" id="audioBtn" onclick="playAnswer()">🔊</button>
-      <span class="audio-answer" id="audioAnswer"></span>
+
+    <div id="studyScreen" class="screen">
+      <div class="header">
+        <div class="header-title">
+          <h2>Справочник</h2>
+          <p>Нажми на строку — запоминай написание</p>
+        </div>
+        <button class="btn btn-ghost" id="studyBackBtn">Назад</button>
+      </div>
+      <div id="studyContent" style="padding-bottom:30px;"></div>
     </div>
-    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Далее →</button>
+
+    <div id="gameScreen" class="screen">
+      <div class="header">
+        <div class="header-title">
+          <p id="sessionMeta"></p>
+        </div>
+        <button class="btn btn-ghost" id="pauseBtn">Пауза</button>
+      </div>
+      <div class="stats">
+        <div class="stat-card"><div class="label">Верно</div><div class="value correct" id="correctCount">0</div></div>
+        <div class="stat-card"><div class="label">Ошибки</div><div class="value wrong" id="wrongCount">0</div></div>
+        <div class="stat-card"><div class="label">Серия</div><div class="value streak" id="streakCount">0</div></div>
+        <div class="stat-card"><div class="label">Точность</div><div class="value" id="accuracyCount">0%</div></div>
+      </div>
+      <div class="progress-shell card">
+        <div class="progress-meta">
+          <div class="progress-left">
+            <strong id="progressTitle">Вопрос 1 из 20</strong>
+            <span id="progressText">1 / 20</span>
+          </div>
+          <div class="progress-right" id="progressPercent">0%</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="question-card card animate-in" id="questionCard">
+        <div class="question-top">
+          <div class="type-pill"><span class="pulse"></span><span id="exerciseTypeLabel">Задание</span></div>
+        </div>
+        <div class="q-text" id="qText"></div>
+        <div class="q-ru" id="qRu" style="display:none"></div>
+        <div class="q-hint-text" id="qHint"></div>
+        <div id="exerciseArea"></div>
+        <div class="correct-reveal" id="correctReveal"></div>
+        <button class="next-btn" id="nextBtn">Далее</button>
+      </div>
+    </div>
+
+    <div id="resultScreen" class="screen result-screen">
+      <div class="result-card card">
+        <div class="result-emoji" id="resultEmoji"></div>
+        <h2 class="result-title" id="resultTitle">Сессия завершена</h2>
+        <p class="result-subtitle" id="resultSubtitle"></p>
+        <div style="height:18px"></div>
+        <div class="result-stats">
+          <div class="result-stat"><div class="big" style="color:var(--success)" id="resultCorrect">0</div><div class="small">верно</div></div>
+          <div class="result-stat"><div class="big" style="color:var(--danger)" id="resultWrong">0</div><div class="small">ошибки</div></div>
+          <div class="result-stat"><div class="big" style="color:var(--warning)" id="resultBest">0</div><div class="small">лучшая серия</div></div>
+        </div>
+        <div style="height:18px"></div>
+        <div class="result-bar"><div class="result-bar-fill" id="resultBarFill"></div></div>
+        <p id="resultPercent" class="result-percent"></p>
+        <div style="height:16px"></div>
+        <button class="btn btn-primary" id="retryBtn">Пройти ещё раз</button>
+        <div style="height:25px"></div>
+        <button class="btn btn-secondary" id="homeBtn">На главный экран</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<div id="resultScreen" class="screen result-screen">
-  <div class="result-emoji" id="resultEmoji">🎉</div>
-  <h2 class="result-title" id="resultTitle">Отлично!</h2>
-  <div class="result-stats">
-    <div class="result-stat"><div class="big correct" id="resultCorrect">0</div><div class="small">верно</div></div>
-    <div class="result-stat"><div class="big wrong" id="resultWrong">0</div><div class="small">ошибки</div></div>
-    <div class="result-stat"><div class="big streak" id="resultBest">0</div><div class="small">лучшая серия</div></div>
+  <div class="modal-backdrop" id="pauseModal">
+    <div class="modal card">
+      <h3>Пауза</h3>
+      <p>Прогресс не потеряется. Можно продолжить или начать заново.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="resumeBtn">Продолжить</button>
+        <button class="btn btn-secondary" id="restartBtn">Начать заново</button>
+        <button class="btn btn-secondary" id="pauseHomeBtn">На главный экран</button>
+      </div>
+    </div>
   </div>
-  <div class="result-bar"><div class="result-bar-fill" id="resultBarFill"></div></div>
-  <p id="resultPercent" style="color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.8rem;"></p>
-  <button class="restart-btn" onclick="startGame()">Играть снова</button>
-</div>
 
-<div id="settingsScreen" class="screen settings-screen">
-  <div class="settings-header">
-    <button class="back-btn" onclick="showScr('startScreen');checkSaved();">← Назад</button>
-    <span class="settings-title">Настройки</span>
+  <div class="drill-overlay" id="drillOverlay">
+    <div class="drill-card card">
+      <button class="drill-close" id="drillClose">&times;</button>
+      <div class="drill-phase" id="drillPhase"></div>
+    </div>
   </div>
-  <div class="settings-section">
-    <h3>📊 Общий прогресс</h3>
-    <div class="settings-stats" id="settingsStats"></div>
-    <div id="settingsProgress"></div>
+
+  <div class="modal-backdrop" id="faqModal">
+    <div class="modal card" style="max-height:85vh;overflow-y:auto;">
+      <h3>Как это работает?</h3>
+      <div id="faqContent"></div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn btn-primary" id="faqCloseBtn">Понятно!</button>
+      </div>
+    </div>
   </div>
-  <div class="settings-section">
-    <h3>🗑 Сбросить прогресс</h3>
-    <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:14px;">Это удалит весь прогресс и начнёт с нуля.</p>
-    <button class="reset-btn" id="resetBtn" onclick="confirmReset()">Сбросить весь прогресс</button>
-  </div>
-</div>
 
-</div>
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
-<script>
-const COUNTRIES=[
-  {riik:"Inglismaa",rahvus:"inglane",kus:"Inglismaal",rahvused:"inglased",ru:"Англия",ruNat:"англичанин",ruNats:"англичане",ruKus:"в Англии"},
-  {riik:"Saksamaa",rahvus:"sakslane",kus:"Saksamaal",rahvused:"sakslased",ru:"Германия",ruNat:"немец",ruNats:"немцы",ruKus:"в Германии"},
-  {riik:"Venemaa",rahvus:"venelane",kus:"Venemaal",rahvused:"venelased",ru:"Россия",ruNat:"русский",ruNats:"русские",ruKus:"в России"},
-  {riik:"Prantsusmaa",rahvus:"prantslane",kus:"Prantsusmaal",rahvused:"prantslased",ru:"Франция",ruNat:"француз",ruNats:"французы",ruKus:"во Франции"},
-  {riik:"Hispaania",rahvus:"hispaanlane",kus:"Hispaanias",rahvused:"hispaanlased",ru:"Испания",ruNat:"испанец",ruNats:"испанцы",ruKus:"в Испании"},
-  {riik:"Soome",rahvus:"soomlane",kus:"Soomes",rahvused:"soomlased",ru:"Финляндия",ruNat:"финн",ruNats:"финны",ruKus:"в Финляндии"},
-  {riik:"Ukraina",rahvus:"ukrainlane",kus:"Ukrainas",rahvused:"ukrainlased",ru:"Украина",ruNat:"украинец",ruNats:"украинцы",ruKus:"в Украине"},
-  {riik:"Leedu",rahvus:"leedulane",kus:"Leedus",rahvused:"leedulased",ru:"Литва",ruNat:"литовец",ruNats:"литовцы",ruKus:"в Литве"},
-  {riik:"Itaalia",rahvus:"itaallane",kus:"Itaalias",rahvused:"itaallased",ru:"Италия",ruNat:"итальянец",ruNats:"итальянцы",ruKus:"в Италии"},
-  {riik:"Norra",rahvus:"norralane",kus:"Norras",rahvused:"norralased",ru:"Норвегия",ruNat:"норвежец",ruNats:"норвежцы",ruKus:"в Норвегии"},
-  {riik:"Rootsi",rahvus:"rootslane",kus:"Rootsis",rahvused:"rootslased",ru:"Швеция",ruNat:"швед",ruNats:"шведы",ruKus:"в Швеции"},
-  {riik:"Eesti",rahvus:"eestlane",kus:"Eestis",rahvused:"eestlased",ru:"Эстония",ruNat:"эстонец",ruNats:"эстонцы",ruKus:"в Эстонии"},
-  {riik:"Läti",rahvus:"lätlane",kus:"Lätis",rahvused:"lätlased",ru:"Латвия",ruNat:"латыш",ruNats:"латыши",ruKus:"в Латвии"},
-];
-
-function getRu(v,f){const c=COUNTRIES.find(c=>c[f]===v);if(!c)return '';return{riik:c.ru,rahvus:c.ruNat,kus:c.ruKus,rahvused:c.ruNats}[f]||'';}
-function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
-function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
-
-const Q_TYPES=[
-  {q:d=>`Житель «${d.riik}»?`,a:d=>d.rahvus,field:"rahvus"},
-  {q:d=>`Kus? — В «${d.riik}»?`,a:d=>d.kus,field:"kus"},
-  {q:d=>`Жители «${d.riik}» (мн.ч.)?`,a:d=>d.rahvused,field:"rahvused"},
-  {q:d=>`Откуда «${d.rahvus}»?`,a:d=>d.riik,field:"riik"},
-  {q:d=>`«${d.kus}» — страна?`,a:d=>d.riik,field:"riik"},
-  {q:d=>`«${d.rahvused}» — страна?`,a:d=>d.riik,field:"riik"},
-];
-
-function getSTypes(){return[
-  {ru:d=>`Я думаю, что он/она — ${d.ruNat}.`,et:d=>`Ma arvan, et ta on <gap>.`,a:d=>d.rahvus,field:"rahvus"},
-  {ru:d=>`Я думаю, что они — ${d.ruNats}.`,et:d=>`Ma arvan, et nad on <gap>.`,a:d=>d.rahvused,field:"rahvused"},
-  {ru:d=>`Я живу ${d.ruKus}.`,et:d=>`Ma elan <gap>.`,a:d=>d.kus,field:"kus"},
-  {ru:d=>`Он/она живёт ${d.ruKus}.`,et:d=>`Ta elab <gap>.`,a:d=>d.kus,field:"kus"},
-  {ru:d=>`Я — ${d.ruNat}, но живу ${d._dest.ruKus}.`,et:d=>`Ma olen ${d.rahvus}, aga ma elan <gap>.`,a:d=>d._dest.kus,field:"kus",
-    prep:d=>{const o=COUNTRIES.filter(c=>c.riik!==d.riik);d._dest=o[Math.floor(Math.random()*o.length)];}},
-  {ru:d=>`Они — ${d.ruNats}.`,et:d=>`Nad on <gap>.`,a:d=>d.rahvused,field:"rahvused"},
-  {ru:d=>`${cap(d.ruNats)} живут ${d.ruKus}.`,et:d=>`${cap(d.rahvused)} elavad <gap>.`,a:d=>d.kus,field:"kus"},
-  {ru:d=>`Где ты живёшь? — ${cap(d.ruKus)}.`,et:d=>`Kus sa elad? — <gap>.`,a:d=>d.kus,field:"kus"},
-  {ru:d=>`Он/она — ${d.ruNat}.`,et:d=>`Ta on <gap>.`,a:d=>d.rahvus,field:"rahvus"},
-];}
-
-// ── STORAGE ──
-const SAVE_KEY = 'rr_save';
-
-function saveProgress() {
-  const data = { cState, correct, wrong, best, total, ts: Date.now() };
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {}
-}
-
-function loadProgress() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch(e) { return null; }
-}
-
-function clearProgress() {
-  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
-}
-
-function hasSave() { return !!loadProgress(); }
-
-// ── STATE ──
-let cState={},curQ=null,correct=0,wrong=0,streak=0,best=0,total=0;
-let ans=false;
-const UP=2,MAXLVL=2;
-
-function initFresh(){cState={};COUNTRIES.forEach(c=>cState[c.riik]={level:0,streak:0,done:false});}
-function mastered(){return Object.values(cState).filter(s=>s.done).length;}
-function isDone(){return mastered()>=COUNTRIES.length;}
-
-function pick(){
-  const pool=COUNTRIES.filter(c=>!cState[c.riik].done);
-  if(!pool.length)return null;
-  const w=[];pool.forEach(c=>{const n=3-cState[c.riik].level;for(let i=0;i<n;i++)w.push(c);});
-  return w[Math.floor(Math.random()*w.length)];
-}
-
-function mkWord(c,typing){
-  const qt=Q_TYPES[Math.floor(Math.random()*Q_TYPES.length)],a=qt.a(c);
-  const wr=[],seen=new Set([a]);
-  for(const x of shuffle(COUNTRIES)){const v=qt.a(x);if(!seen.has(v)){wr.push(v);seen.add(v);}if(wr.length>=3)break;}
-  return{type:'word',text:qt.q(c),answer:a,options:shuffle([a,...wr]),isTyping:typing,field:qt.field,country:c};
-}
-
-function mkSent(c){
-  const sts=getSTypes(),st=sts[Math.floor(Math.random()*sts.length)];
-  if(st.prep)st.prep(c);
-  const a=st.a(c),ru=st.ru(c),et=st.et(c);
-  const wr=[],seen=new Set([a]);
-  for(const x of shuffle(COUNTRIES)){const v=st.a(x);if(!seen.has(v)){wr.push(v);seen.add(v);}if(wr.length>=3)break;}
-  return{type:'sentence',ruPrompt:ru,etTemplate:et,answer:a,options:shuffle([a,...wr]),isTyping:true,field:st.field,country:c};
-}
-
-function genNext(){
-  const c=pick();if(!c)return null;
-  const lvl=cState[c.riik].level;
-  if(lvl===0)return mkWord(c,false);
-  if(lvl===1)return mkWord(c,true);
-  return mkSent(c);
-}
-
-// ── UI ──
-function showScr(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-
-function startGame(resume){
-  if(resume && hasSave()){
-    const d=loadProgress();
-    cState=d.cState; correct=d.correct; wrong=d.wrong; best=d.best; total=d.total;
-  } else {
-    initFresh(); correct=0; wrong=0; best=0; total=0;
-  }
-  streak=0;
-  showScr('gameScreen'); renderDots(); nextQuestion();
-}
-
-function pauseGame(){
-  saveProgress();
-  showScr('startScreen');
-  checkSaved();
-  showToast('Прогресс сохранён','var(--accent)');
-}
-
-function checkSaved(){
-  const d=loadProgress();
-  const btn=document.getElementById('continueBtn');
-  const badge=document.getElementById('savedBadge');
-  const info=document.getElementById('savedInfo');
-  if(d && !isDoneFromData(d)){
-    const m=Object.values(d.cState).filter(s=>s.done).length;
-    btn.style.display='';
-    badge.style.display='';
-    info.textContent=`Сохранено: ${m}/13 стран · ${d.total} вопросов`;
-  } else {
-    btn.style.display='none';
-    badge.style.display='none';
-  }
-}
-
-function isDoneFromData(d){return Object.values(d.cState).filter(s=>s.done).length>=COUNTRIES.length;}
-
-function renderDots(){
-  const w=document.getElementById('countryDots');w.innerHTML='';
-  COUNTRIES.forEach(c=>{const d=document.createElement('span');d.className='country-dot';d.id='dot-'+c.riik;d.textContent=c.ru;updDot(c.riik,d);w.appendChild(d);});
-}
-
-function updDot(r,el){
-  const s=cState[r],d=el||document.getElementById('dot-'+r);if(!d)return;
-  d.className='country-dot';
-  if(s.done)d.classList.add('mastered');else if(s.level>=2)d.classList.add('level2');else if(s.level>=1)d.classList.add('level1');
-}
-
-function updStats(){
-  document.getElementById('correctCount').textContent=correct;
-  document.getElementById('wrongCount').textContent=wrong;
-  document.getElementById('streakCount').textContent=streak;
-  const m=mastered(),pct=Math.round((m/COUNTRIES.length)*100);
-  document.getElementById('progressText').textContent=`Освоено ${m} / ${COUNTRIES.length}`;
-  document.getElementById('progressPercent').textContent=`${pct}%`;
-  document.getElementById('progressFill').style.width=`${pct}%`;
-}
-
-function render(){
-  ans=false;const q=curQ,card=document.getElementById('questionCard');
-  card.classList.remove('animate-in');void card.offsetWidth;card.classList.add('animate-in');
-  const qT=document.getElementById('qText');
-  document.getElementById('qHintText').textContent='';
-  document.getElementById('correctReveal').textContent='';
-  document.getElementById('nextBtn').style.display='none';
-  hideAudioRow();
-
-  if(q.type==='sentence'){
-    const ru=document.createElement('div');ru.className='q-ru-prompt';ru.textContent='🇷🇺 '+q.ruPrompt;
-    const p=q.etTemplate.split('<gap>');qT.innerHTML='';
-    const s=document.createElement('div');s.className='q-sentence';
-    s.innerHTML=`${p[0]}<span class="gap" id="gapSpan">???</span>${p[1]||''}`;
-    qT.appendChild(ru);qT.appendChild(s);
-  }else{qT.textContent=q.text;}
-
-  const oW=document.getElementById('optionsWrap'),tW=document.getElementById('typingWrap');
-
-  if(q.isTyping){
-    oW.style.display='none';tW.style.display='flex';
-    const inp=document.getElementById('typingInput');
-    inp.value='';inp.className='typing-input';inp.disabled=false;
-    inp.placeholder=q.type==='sentence'?'Введите пропущенное слово...':'Введите ответ...';
-    document.getElementById('typingSubmit').disabled=false;
-    setTimeout(()=>inp.focus(),100);
-  }else{
-    oW.style.display='flex';tW.style.display='none';oW.innerHTML='';
-    q.options.forEach((opt,i)=>{
-      const b=document.createElement('button');b.className='option-btn';b.dataset.value=opt;
-      const ru=getRu(opt,q.field);
-      b.innerHTML=`<span class="opt-est">${opt}</span>${ru?`<span class="opt-ru">${ru}</span>`:''}`;
-      b.onclick=()=>selOpt(b,opt);b.style.animationDelay=`${i*60}ms`;oW.appendChild(b);
-    });
-  }
-  updStats();
-}
-
-function fillGap(t,ok){const g=document.getElementById('gapSpan');if(g){g.textContent=t;g.classList.add('filled');g.style.color=ok?'var(--accent)':'var(--danger)';}}
-
-function selOpt(btn,sel){
-  if(ans)return;ans=true;const q=curQ,ok=sel===q.answer;
-  if(q.type==='sentence')fillGap(q.answer,true);
-  document.querySelectorAll('.option-btn').forEach(b=>{b.disabled=true;
-    if(b.dataset.value===q.answer)b.classList.add('correct-answer');
-    else if(b===btn&&!ok)b.classList.add('wrong-answer');
-    else b.classList.add('dimmed');});
-  proc(ok);
-}
-
-function submitTyping(){
-  if(ans)return;const inp=document.getElementById('typingInput'),val=inp.value.trim().toLowerCase();
-  if(!val)return;ans=true;inp.disabled=true;document.getElementById('typingSubmit').disabled=true;
-  const q=curQ,ok=val===q.answer.toLowerCase();
-  if(ok){inp.classList.add('correct');if(q.type==='sentence')fillGap(q.answer,true);}
-  else{inp.classList.add('wrong');inp.classList.add('shake');
-    document.getElementById('correctReveal').textContent=`Правильно: ${q.answer}`;
-    if(q.type==='sentence')fillGap(q.answer,false);}
-  proc(ok);
-}
-
-// ── AUDIO ──
-function getAudioFile(word) {
-  // Map special chars: ä -> a in filename
-  const fname = word.toLowerCase().replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u');
-  return 'audio/' + fname + '.wav';
-}
-
-let currentAudio = null;
-
-function playAnswer() {
-  if (!curQ) return;
-  const file = getAudioFile(curQ.answer);
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-  currentAudio = new Audio(file);
-  const btn = document.getElementById('audioBtn');
-  btn.classList.add('playing');
-  currentAudio.onended = () => { btn.classList.remove('playing'); };
-  currentAudio.onerror = () => { btn.classList.remove('playing'); };
-  currentAudio.play().catch(() => btn.classList.remove('playing'));
-}
-
-function showAudioRow(answer) {
-  const row = document.getElementById('audioRow');
-  const label = document.getElementById('audioAnswer');
-  label.textContent = answer;
-  row.style.display = 'flex';
-  // Auto-play, show next button only after audio ends
-  setTimeout(() => {
-    if (!curQ) return;
-    const file = getAudioFile(curQ.answer);
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    currentAudio = new Audio(file);
-    const btn = document.getElementById('audioBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    btn.classList.add('playing');
-    currentAudio.onended = () => {
-      btn.classList.remove('playing');
-      nextBtn.style.display = 'block';
-    };
-    currentAudio.onerror = () => {
-      btn.classList.remove('playing');
-      nextBtn.style.display = 'block';
-    };
-    currentAudio.play().catch(() => {
-      btn.classList.remove('playing');
-      nextBtn.style.display = 'block';
-    });
-  }, 300);
-}
-
-function hideAudioRow() {
-  document.getElementById('audioRow').style.display = 'none';
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-}
-
-function proc(ok){
-  const q=curQ,r=q.country.riik,s=cState[r];total++;
-  if(ok){
-    correct++;streak++;if(streak>best)best=streak;
-    s.streak++;
-    if(s.streak>=UP){
-      if(s.level<MAXLVL){s.level++;s.streak=0;showToast(`${q.country.ru} → уровень ${s.level+1}!`,'var(--accent2)');}
-      else{s.done=true;showToast(`✨ ${q.country.ru} освоена!`,'var(--accent)');}
+  <script src="engine.js"></script>
+  <script src="data.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.log('SW failed:', err));
+      });
     }
-  }else{
-    wrong++;streak=0;s.streak=0;
-    if(s.level>0){s.level--;showToast(`${q.country.ru} ← уровень ${s.level+1}`,'var(--danger)');}
-  }
-  updDot(r);updStats();
-  saveProgress();
-  showAudioRow(q.answer);
-  document.getElementById('nextBtn').textContent=isDone()?'Результаты →':'Далее →';
-}
-
-function nextQuestion(){
-  if(isDone()){clearProgress();showResults();return;}
-  curQ=genNext();if(!curQ){clearProgress();showResults();return;}
-  render();
-}
-
-// ── SETTINGS ──
-function showSettings(){
-  showScr('settingsScreen');
-  renderSettings();
-}
-
-function renderSettings(){
-  const d=loadProgress();
-  const wrap=document.getElementById('settingsProgress');
-  const statsWrap=document.getElementById('settingsStats');
-  wrap.innerHTML='';
-  statsWrap.innerHTML='';
-
-  const state=d?d.cState:null;
-  const m=state?Object.values(state).filter(s=>s.done).length:0;
-  const t=d?d.total:0;
-  const c=d?d.correct:0;
-  const pct=t>0?Math.round((c/t)*100):0;
-
-  statsWrap.innerHTML=`
-    <div class="ss"><div class="ss-val" style="color:var(--accent)">${m}/13</div><div class="ss-lbl">освоено</div></div>
-    <div class="ss"><div class="ss-val">${t}</div><div class="ss-lbl">вопросов</div></div>
-    <div class="ss"><div class="ss-val">${pct}%</div><div class="ss-lbl">точность</div></div>
-  `;
-
-  const lvlNames=['Уровень 1','Уровень 2','Уровень 3','Освоена'];
-
-  COUNTRIES.forEach(co=>{
-    const s=state?state[co.riik]:{level:0,streak:0,done:false};
-    const row=document.createElement('div');row.className='progress-row';
-    const lvl=s.done?3:s.level;
-    const cls=['l0','l1','l2','done'][lvl];
-    row.innerHTML=`
-      <div><div class="pr-country">${co.ru}</div><div class="pr-est">${co.riik}</div></div>
-      <span class="pr-level ${cls}">${lvlNames[lvl]}</span>`;
-    wrap.appendChild(row);
-  });
-
-  document.getElementById('resetBtn').disabled=!d;
-}
-
-let resetConfirm=false;
-function confirmReset(){
-  if(!resetConfirm){
-    resetConfirm=true;
-    document.getElementById('resetBtn').textContent='Точно сбросить? Нажмите ещё раз';
-    document.getElementById('resetBtn').style.background='rgba(255,92,108,0.1)';
-    setTimeout(()=>{resetConfirm=false;document.getElementById('resetBtn').textContent='Сбросить весь прогресс';document.getElementById('resetBtn').style.background='';},3000);
-    return;
-  }
-  clearProgress();
-  resetConfirm=false;
-  document.getElementById('resetBtn').textContent='Сбросить весь прогресс';
-  document.getElementById('resetBtn').style.background='';
-  renderSettings();
-  showToast('Прогресс сброшен','var(--danger)');
-}
-
-// ── RESULTS ──
-function showResults(){
-  showScr('resultScreen');
-  const pct=total>0?Math.round((correct/total)*100):0;
-  document.getElementById('resultCorrect').textContent=correct;
-  document.getElementById('resultWrong').textContent=wrong;
-  document.getElementById('resultBest').textContent=best;
-  document.getElementById('resultPercent').textContent=`${pct}% правильных · ${total} вопросов`;
-  let e='🎉',t='Все 13 стран освоены!';
-  if(pct<40){e='📚';t='Готово, но нужна практика!';}
-  else if(pct<70){e='💪';t='Все страны пройдены!';}
-  else if(pct<90){e='🔥';t='Отличный результат!';}
-  document.getElementById('resultEmoji').textContent=e;
-  document.getElementById('resultTitle').textContent=t;
-  setTimeout(()=>{document.getElementById('resultBarFill').style.width=`${pct}%`;},200);
-}
-
-function showToast(m,c){const t=document.getElementById('toast');t.textContent=m;t.style.borderColor=c;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
-
-document.addEventListener('keydown',e=>{if(e.key==='Enter'){const n=document.getElementById('nextBtn');if(n.style.display==='block')nextQuestion();else if(curQ?.isTyping&&!ans)submitTyping();}});
-
-// ── INIT: check for saved game on load ──
-checkSaved();
-</script>
+  </script>
 </body>
 </html>
